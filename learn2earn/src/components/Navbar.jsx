@@ -13,7 +13,7 @@ function Navbar(props) {
     return (
         <>
             <div className="fixed top-0 left-0 w-full flex justify-between items-center px-5 pb-2 border-b border-gray-400 bg-white">
-                {isSidebarVisible && <Sidebar categories={props.categories} onCategoryChange={props.setCurrentCategory} />}
+                {isSidebarVisible && <Sidebar isSidebarVisible={isSidebarVisible} categories={props.categories} onCategoryChange={props.setCurrentCategory} toggleSidebar={toggleSidebar} />}
                 <div className="space-y-1 w-8 h-6 flex flex-col justify-between items-center cursor-pointer" onClick={toggleSidebar}>
                     <div className={`h-0.5 w-full bg-black transform transition duration-300 ease-in-out ${isSidebarVisible ? 'rotate-45 translate-y-2.5 translate-x-2' : ''}`}></div>
                     <div className={`h-0.5 w-full bg-black transition-opacity duration-300 ease-in-out ${isSidebarVisible ? 'opacity-0' : 'opacity-100'}`}></div>
