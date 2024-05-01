@@ -1,5 +1,6 @@
-import ItemList from "../components/ItemList.jsx"
+import ItemList from "../components/ItemList.jsx";
 import Navbar from "../components/Navbar.jsx";
+import SearchBar from "../components/SearchBar.jsx";
 import React, { useState } from "react";
 
 function Main() {
@@ -15,11 +16,14 @@ function Main() {
     const categories = ['All', 'sci-fi', 'fantasy'];  // Define categories
 
     return (
-        <div>
-            <Navbar categories={categories} setCurrentCategory={setCurrentCategory}/>
-            <ItemList filteredItems={filteredItems}/>
+        <div className="min-h-screen bg-gray-100">
+            <Navbar categories={categories} setCurrentCategory={setCurrentCategory} />
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <SearchBar onSearch={(searchTerm) => console.log("Searching for:", searchTerm)} />    
+                <ItemList filteredItems={filteredItems} />
+            </div>
         </div>
-    )
+    );
 }
 
 export default Main;
