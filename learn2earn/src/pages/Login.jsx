@@ -24,7 +24,7 @@ function Login() {
                                 <input type="checkbox" className="form-checkbox" />
                                 <span className="ml-2">Remember me</span>
                             </label>
-                            <a href="#" className="text-black font-bold hover:text-gray-700">Forgot Password?</a>
+                            <a href="/forgpass" className="text-black font-bold hover:text-gray-700">Forgot Password?</a>
                         </div>
                         <button type="submit" className="w-full bg-black hover:bg-gray-900 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Login</button>
                         <div className="register-link text-center text-sm">
