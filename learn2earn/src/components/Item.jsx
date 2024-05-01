@@ -42,7 +42,9 @@ function Item(props) {
                         <div className="p-4">
                             <p className="text-md font-bold">{props.title}</p>
                             <p className="text-sm text-gray-600">{props.author}</p>
-                            <p className="text-xs">{props.user}, {props.category}</p>
+                            <p className="text-xs">{props.user}</p>
+                            <p className='font-bold'><a href="#">{props.email}</a></p>
+                            <p className="text-xs">Curious about this trade? <a href="#" className='font-bold'>Send an e-mail to the User!</a></p>
                         </div>
                     </div>
                 </div>
