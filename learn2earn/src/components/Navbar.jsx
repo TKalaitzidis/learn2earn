@@ -19,14 +19,14 @@ function Navbar(props) {
                     <div className={`h-0.5 w-full bg-black transition-opacity duration-300 ease-in-out ${isSidebarVisible ? 'opacity-0' : 'opacity-100'}`}></div>
                     <div className={`h-0.5 w-full bg-black transform transition duration-300 ease-in-out ${isSidebarVisible ? '-rotate-45 -translate-y-2.5 translate-x-2' : ''}`}></div>
                 </div>
-                <a href="#" className="bg-no-repeat pt-2" style={{ width: '5%', height: '10%' }}>
+                <a href="/home" className="bg-no-repeat pt-2" style={{ width: '5%', height: '10%' }}>
                     <img src={logo} alt="Logo"/>
                 </a>
                 <nav className="navbar">
                     <ul className="list-none m-0 p-0">
-                        <li className="inline-block px-5"><a href="#" className="text-black no-underline hover:text-gray-500 transition duration-300 ease-in-out">Login/Sign-Up</a></li>
-                        <li className="inline-block px-5"><a href="#" className="text-black no-underline hover:text-gray-500 transition duration-300 ease-in-out">About</a></li>  
-                        <li className="inline-block px-5"><a href="#" className="text-black no-underline hover:text-gray-500 transition duration-300 ease-in-out">Contact</a></li>
+                        <li className="inline-block px-5"><a href="/login" className="text-black no-underline hover:text-gray-500 transition duration-300 ease-in-out">Login/Sign-Up</a></li>
+                        <li className="inline-block px-5"><a href="/about" className="text-black no-underline hover:text-gray-500 transition duration-300 ease-in-out">About</a></li>  
+                        <li className="inline-block px-5"><a href="/contact" className="text-black no-underline hover:text-gray-500 transition duration-300 ease-in-out">Contact</a></li>
                     </ul>
                 </nav>
             </div>

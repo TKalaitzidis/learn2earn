@@ -1,5 +1,5 @@
-import ItemList from "./ItemList.jsx"
-import Navbar from "./Navbar.jsx";
+import ItemList from "../components/ItemList.jsx"
+import Navbar from "../components/Navbar.jsx";
 import React, { useState } from "react";
 
 function Main() {
