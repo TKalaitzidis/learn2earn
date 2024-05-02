@@ -21,7 +21,7 @@ function Item(props) {
                 onClick={toggleOverlay}>
                 <div className="p-4">
                     {/* Non-overlay Image with specific dimensions, adjusted object-fit */}
-                    <img src={Bookimg} alt="Image Error" style={{ width: '160px', height: '200px', objectFit: 'fill' }} className="rounded-t-lg" />
+                    <img src={Bookimg} alt="Image Error" style={{ width: '160px', height: '180px', objectFit: 'fill' }} className="rounded-t-lg" />
                     <div className="pt-2">
                         <p className="text-sm font-semibold">{props.author}</p>
                         <p className="text-md font-bold">{props.title}</p>
@@ -42,9 +42,10 @@ function Item(props) {
                         <div className="p-4">
                             <p className="text-md font-bold">{props.title}</p>
                             <p className="text-sm text-gray-600">{props.author}</p>
+                            <p>Looking for: {props.lookingFor}</p>
                             <p className="text-xs">{props.user}</p>
                             <p className='font-bold'><a href="#">{props.email}</a></p>
-                            <p className="text-xs">Curious about this trade? <a href="#" className='font-bold'>Send an e-mail to the User!</a></p>
+                            <p className="text-xs">Curious about this trade? <a href="#" className='font-bold hover:text-gray-700'>Send an e-mail to the User!</a></p>
                         </div>
                     </div>
                 </div>

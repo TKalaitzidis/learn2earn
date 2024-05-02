@@ -5,6 +5,7 @@ import Contact from './pages/Contact.jsx';
 import About from './pages/About.jsx';
 import Register from './pages/Register.jsx';
 import ForgPass from './pages/ForgPass.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
         <Route path="/forgpass" element={<ForgPass />} />
+        <Route path='/dashboard' element={<Dashboard />}/>
       </Routes>
     </BrowserRouter>
   );

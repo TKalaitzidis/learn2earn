@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { MdOutlineArrowDropDown } from "react-icons/md";
+import { IoCloseSharp } from "react-icons/io5";
+
 
 function Sidebar({ categories, onCategoryChange, isSidebarVisible, toggleSidebar }) {
     const [isCatVisible, setIsCatVisible] = useState(false);
@@ -22,7 +24,7 @@ function Sidebar({ categories, onCategoryChange, isSidebarVisible, toggleSidebar
             <div className="fixed top-0 left-0 w-64 h-full bg-white z-50 shadow-lg transition-transform duration-300 ease-in-out"
                  style={{ transform: isSidebarVisible ? 'translateX(0)' : 'translateX(-100%)' }}>
                 
-                <button onClick={toggleSidebar} className="text-black p-4 absolute top-0 left-0">X</button>
+                <button onClick={toggleSidebar} className="text-black p-4 absolute top-0 left-0"><IoCloseSharp/></button>
                 <div className="pt-12"> 
                     <div className="flex items-center justify-between p-2 cursor-pointer" onClick={toggleCatVisibility}>
                         <h2>Categories</h2>
