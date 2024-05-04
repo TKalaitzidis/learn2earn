@@ -7,6 +7,7 @@ import Register from './pages/Register.jsx';
 import ForgPass from './pages/ForgPass.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Chatroom from './pages/Chatroom.jsx';
+import Settings from './pages/Settings.jsx';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/forgpass" element={<ForgPass />} />
         <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/chatroom' element={<Chatroom />}/>
+        <Route path='/settings' element={<Settings />}/>
       </Routes>
     </BrowserRouter>
   );
