@@ -8,6 +8,7 @@ import ForgPass from './pages/ForgPass.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Chatroom from './pages/Chatroom.jsx';
 import Settings from './pages/Settings.jsx';
+import UserChoice from './pages/UserChoice.jsx';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/chatroom' element={<Chatroom />}/>
         <Route path='/settings' element={<Settings />}/>
+        <Route path='/userchoice' element={<UserChoice />}/>
       </Routes>
     </BrowserRouter>
   );

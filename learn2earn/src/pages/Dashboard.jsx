@@ -213,12 +213,14 @@ function Dashboard() {
                                             <p className="text-gray-900 whitespace-no-wrap">{request.author}</p>
                                         </td>
                                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                            <a href="/userchoice">
                                             <button
-                                                onClick={() => handleRemoveRequest(request.id)}
                                                 className="mr-2 text-white font-bold py-2 px-4 rounded inline-flex items-center bg-black hover:bg-gray-900"
                                             >
                                                 See offers
                                             </button>
+                                            </a>
+                                           
                                             <button
                                                 onClick={() => handleRemoveRequest(request.id)}
                                                 className="text-white font-bold py-2 px-4 rounded inline-flex items-center bg-black hover:bg-gray-900"

@@ -20,7 +20,7 @@ function Main() {
             <Navbar categories={categories} setCurrentCategory={setCurrentCategory} />
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <SearchBar onSearch={(searchTerm) => console.log("Searching for:", searchTerm)} />    
-                <ItemList filteredItems={filteredItems} />
+                <ItemList filteredItems={filteredItems} isMain={true}/>
             </div>
         </div>
     );

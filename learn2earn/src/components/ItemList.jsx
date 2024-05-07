@@ -21,7 +21,7 @@ function ItemList(props) {
                 <ul className="list-none p-5 flex justify-center items-start flex-wrap">
                     {currentItems.map((item, index) => (
                         <li key={index} >
-                            <Item author={item.author} title={item.title} area={item.area} user={item.user} category={item.category}/>
+                            <Item author={item.author} title={item.title} area={item.area} user={item.user} category={item.category} isMain={props.isMain}/>
                         </li>
                     ))}
                 </ul>
