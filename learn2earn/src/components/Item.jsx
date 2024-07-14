@@ -34,12 +34,12 @@ function Item(props) {
                     <p className="text-xs text-gray-600">{props.area}</p>
                     <p className="text-xs">{props.user}, {props.category}</p>
                 </div>
-                {showOverlay && (
+                {showOverlay && !props.isMain && (
                     <button onClick={handlePickBook} className="absolute inset-x-0 bottom-0 w-full bg-black text-white py-2 opacity-75 hover:opacity-100 rounded-b-lg transition-opacity">Pick this Book</button>
                 )}
             </div>
 
-            {showPickConfirmation && (
+            {showPickConfirmation && !props.isMain &&(
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-lg w-96 relative" onClick={handleOverlayClick}>
                         <h2 className="text-lg font-semibold mb-4 text-center">Confirm Your Selection</h2>
@@ -70,25 +70,6 @@ function Item(props) {
                 </div>
             )}
 
-            {showOverlay && props.isMain && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center transition-opacity duration-500"
-                     onClick={() => setShowOverlay(false)}>
-                    <div className="bg-white p-4 rounded-lg relative transform transition-all duration-500 ease-out scale-95 opacity-0"
-                         style={{ animation: 'fadeInScale 0.5s forwards' }}
-                         onClick={handleOverlayClick}>
-                        <button className="absolute top-2 right-2 text-black text-xl" onClick={() => setShowOverlay(false)}>&times;</button>
-                        <img src={Bookimg} alt="Book" style={{ width: '384px', height: '288px', objectFit: 'fill' }} className="rounded-t-lg" />
-                        <div className="p-4">
-                            <p className="text-md font-bold">{props.title}</p>
-                            <p className="text-sm text-gray-600">{props.author}</p>
-                            <p>Looking for: {props.lookingFor}</p>
-                            <p className="text-xs">{props.user}</p>
-                            <p className='font-bold'><a href="#">{props.email}</a></p>
-                            <p className="text-xs">Curious about this trade? <a href="#" className='font-bold hover:text-gray-700'>Send an e-mail to the User!</a></p>
-                        </div>
-                    </div>
-                </div>
-            )}
         </>
     );
 }
