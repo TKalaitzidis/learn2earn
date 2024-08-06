@@ -1,9 +1,9 @@
 import Navbar from "../components/Navbar";
 
-function About(){
+function About({isAuth, name}){
     return (
         <>
-            <Navbar />
+            <Navbar isAuth={isAuth} name={name}/>
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="p-8 bg-white shadow-lg rounded-lg max-w-lg mx-auto">
                     <h2 className="text-xl font-bold text-center mb-4">About Learn2Earn</h2>

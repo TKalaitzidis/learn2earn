@@ -14,7 +14,7 @@ function SearchBar({ onSearch }) {
     };
 
     return (
-        <div className="flex justify-center items-center w-full pt-24 pb-14"> {/* Centering and width adjustment */}
+        <div className="flex justify-center items-center w-full pt-24 pb-14 ml-24"> {/* Centering and width adjustment */}
             <form onSubmit={handleSearch} className="flex w-full max-w-4xl"> {/* Max width and full width */}
                 <input
                     type="text"

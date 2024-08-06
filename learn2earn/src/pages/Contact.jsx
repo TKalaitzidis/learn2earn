@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from "../components/Navbar";
 
-function Contact() {
+function Contact({isAuth, name}) {
     const [email, setEmail] = useState('');
     const [description, setDescription] = useState('');
     const [anonymous, setAnonymous] = useState(false);
@@ -18,7 +18,7 @@ function Contact() {
 
     return (
         <div className="min-h-screen bg-gray-100"> {/* Set background color for the entire view */}
-            <Navbar />
+            <Navbar isAuth={isAuth} name={name}/>
             <div className="container mx-auto px-4 pt-28 pb-8">
                 <h2 className="text-xl font-bold text-center my-4">Found a bug? Please report it to us!</h2>
                 <form onSubmit={handleSubmit} className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow"> {/* Add padding, background, and shadow to form */}

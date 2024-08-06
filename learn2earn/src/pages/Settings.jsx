@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar.jsx';
 
-function Settings() {
+function Settings({setIsAuth, isAuth, name}) {
+    
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -10,7 +11,8 @@ function Settings() {
     const [tempAction, setTempAction] = useState(null);
     const [confirmPasswordForAction, setConfirmPasswordForAction] = useState('');
 
-    // Handlers for form submissions
+    console.log(isAuth);
+
     const showConfirmation = (action) => {
         setTempAction(() => action);
         setConfirmOverlayVisible(true);
@@ -22,9 +24,15 @@ function Settings() {
         setConfirmOverlayVisible(false);
     };
 
+    const logout = (e) => {
+        e.preventDefault();
+        localStorage.removeItem("token");
+        setIsAuth(false);
+    } 
+
     return (
         <div className="min-h-screen bg-gray-100">
-            <Navbar />
+            <Navbar isAuth={isAuth} name={name}/>
             <div className="container mx-auto px-4 py-24">
                 <h1 className="text-xl font-bold mb-4 text-center">Settings</h1>
                 <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
@@ -82,7 +90,7 @@ function Settings() {
                     </div>
 
                     {/* Action Buttons */}
-                    <button onClick={() => console.log('Logout')} className="w-full px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">Log Out</button>
+                    <button onClick={e => logout(e)} className="w-full px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">Log Out</button>
                     <div className="mt-4">
                         <button onClick={() => showConfirmation('delete')} className="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Delete Account</button>
                         <p className="text-gray-600 italic mt-2">Warning: This action is permanent.</p>
