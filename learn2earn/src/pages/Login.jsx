@@ -7,7 +7,7 @@ import { useState } from "react";
 function Login({setIsAuth, isAuth}) {
 
     const [data, setData] = useState({
-        username: '',
+        username: 'papap',
         password: ''
       })
     const loginUser = async (e) => {
