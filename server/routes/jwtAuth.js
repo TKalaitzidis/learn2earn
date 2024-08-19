@@ -12,6 +12,8 @@ router.post("/register", validInfo, async (req, res) => {
   try {
     const { email, username, password, city } = req.body;
 
+    
+
     const user = await pool.query(
       "SELECT * FROM userbase WHERE user_email = $1",
       [email]
@@ -34,7 +36,7 @@ router.post("/register", validInfo, async (req, res) => {
     
     const token = jwtGenerator(newUser.rows[0].user_id);
 
-     res.json({ token });
+    res.json({ token });
   } catch (err) {
     console.error(err.message);
     res.status(500).send(req.body);
@@ -75,6 +77,19 @@ router.get("/is-verify", authorization, async (req, res) =>{
     res.json(true)    
   } catch (err) {
     console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+})
+
+router.get("/uid", authorization, async (req, res) => {
+  try {
+    const {username} = req.body;
+
+    const uid = await pool.query("SELECT user_id FROM userbase WHERE user_name = $1", [username]);
+
+    res.send(uid.rows[0].user_id.toString());
+  } catch (error) {
+    console.error(error.message);
     res.status(500).send("Server Error");
   }
 })

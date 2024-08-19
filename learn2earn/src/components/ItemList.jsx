@@ -4,15 +4,16 @@ import Item from "./Item";
 import Pagination from "./Pagination";
 
 
-function ItemList(props) {
+function ItemList({items, username, isMain, setItems}) {
     const [currentPage, setCurrentPage] = useState(1);
     
     const itemsPerPage = 20;
     
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = props.filteredItems.slice(indexOfFirstItem, indexOfLastItem);
-    const pagesNo = Math.ceil(props.filteredItems.length / itemsPerPage);
+    const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
+    const pagesNo = Math.ceil(items.length / itemsPerPage);
+    
 
     return (
         <div className="flex-col ml-72 p-5">
@@ -40,7 +41,7 @@ function ItemList(props) {
                     </thead>
                     <tbody className="w-max border ">
                     {currentItems.map((item, index) => (
-                            <Item key={index} author={item.book_author} title={item.book_name}  category={item.book_genre} points={item.book_points} type ={item.book_type} isMain={props.isMain}/>
+                            <Item name={username} key={index} book={item} isMain={isMain} setItems={setItems}/>
                     ))}
                     </tbody>
                 </table>

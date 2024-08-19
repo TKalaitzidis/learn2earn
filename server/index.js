@@ -22,5 +22,8 @@ app.use("/dashboard", require("./routes/dashboard"));
 
 app.use("/books", require("./routes/booklists"));
 
+//search route
+app.use("/search", require("./routes/search"));
+
 const port = 8000;
 app.listen(port, () => console.log("Server is running on port", port))

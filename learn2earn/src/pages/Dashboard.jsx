@@ -80,7 +80,6 @@ function Dashboard({isAuth, name}) {
         }
     };
 
-    console.log(isAuth)
 
     return (
         <>

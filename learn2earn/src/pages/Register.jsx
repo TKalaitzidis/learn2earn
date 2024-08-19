@@ -22,7 +22,7 @@ function Register(setIsAuth) {
     email: '',
     username: '',
     password: '',
-    city: ''
+    city: 'Athens'
   })
 
   const registerUser = async (e) => {
@@ -38,6 +38,8 @@ function Register(setIsAuth) {
 
       const parseRes = await response.json()
       
+      console.log(parseRes)
+
       localStorage.setItem("token", parseRes.token);
       if(parseRes.token){
         setIsAuth(true)

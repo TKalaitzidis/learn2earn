@@ -104,7 +104,7 @@ function App() {
           }
         />
         <Route path="/userchoice" element={<UserChoice />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<Profile isAuth={isAuth} name={name} />} />
       </Routes>
     </BrowserRouter>
   );
