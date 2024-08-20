@@ -12,6 +12,36 @@ import UserChoice from "./pages/UserChoice.jsx";
 import Profile from "./pages/Profile.jsx";
 
 function App() {
+
+  const categories = [
+    "All", 
+    "Sci-Fi", 
+    "Fantasy", 
+    "Adventure", 
+    "Fiction", 
+    "Dystopian", 
+    "Mystery", 
+    "Thriller", 
+    "Horror", 
+    "Romance", 
+    "Historical Fiction", 
+    "Biography", 
+    "Self-Help", 
+    "Non-Fiction", 
+    "Young Adult", 
+    "Children's", 
+    "Graphic Novel", 
+    "Poetry", 
+    "Crime", 
+    "Memoir", 
+    "Philosophy", 
+    "Science", 
+    "Technology", 
+    "Travel", 
+    "Classics", 
+    "Humor"
+  ];
+  
   const [isAuth, setIsAuth] = useState(false);
 
   async function checkIsAuth() {
@@ -57,7 +87,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate replace to="/home" />} />
-        <Route path="/home" element={<Main isAuth={isAuth} name={name} />} />
+        <Route path="/home" element={<Main isAuth={isAuth} name={name} categories={categories}/>} />
         <Route
           path="/login"
           element={

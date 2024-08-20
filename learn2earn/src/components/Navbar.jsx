@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../assets/Logo.png';
-import Sidebar from "./Sidebar.jsx";
 
 function Navbar({isAuth, name}) {
     const location = useLocation();

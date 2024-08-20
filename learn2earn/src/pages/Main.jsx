@@ -4,10 +4,12 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar.jsx";
 import { FaSearch } from "react-icons/fa";
 
-function Main({ isAuth, name }) {
+function Main({ isAuth, name, categories }) {
   const [items, setItems] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [currentCategory, setCurrentCategory] = useState("All"); 
 
   const onSearch = async (e) => {
     e.preventDefault();
@@ -29,6 +31,16 @@ function Main({ isAuth, name }) {
       console.error(error.message);
     }
   };
+
+  const handleCategoryChange = (currentCategory, books = items) => {
+    if (currentCategory === "All"){
+      setItems(books);
+    }
+    else{
+      const filtered = books.filter((book) => book.genre === currentCategory);
+      setItems(filtered);
+    }
+  }
 
   async function getBooks() {
     try {
@@ -56,14 +68,14 @@ function Main({ isAuth, name }) {
     getBooks();
   }, []);
 
-  const [currentCategory, setCurrentCategory] = useState("All"); // State for current category
-  const categories = ["All", "sci-fi", "fantasy"]; // Define categories
+  useEffect(() => {
+    handleCategoryChange(currentCategory);
+  }, [currentCategory])  
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar
         categories={categories}
-        setCurrentCategory={setCurrentCategory}
         isAuth={isAuth}
         name={name}
       />
@@ -75,7 +87,7 @@ function Main({ isAuth, name }) {
           <form onSubmit={onSearch} className="flex w-full max-w-4xl">
             <input
               type="text"
-              placeholder="Search Authors, Book Titles, Users"
+              placeholder="Search Authors or Book Titles"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="border-2 border-gray-300 bg-white h-10 px-5 rounded-l-lg flex-grow focus:outline-none"

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaSearch } from "react-icons/fa"; // Ensure this is correctly imported
+import { FaSearch } from "react-icons/fa"; 
 
 function SearchBar({ onSearch }) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -18,7 +18,7 @@ function SearchBar({ onSearch }) {
             <form onSubmit={handleSearch} className="flex w-full max-w-4xl"> 
                 <input
                     type="text"
-                    placeholder="Search Authors, Book Titles, Users"
+                    placeholder="Search Authors or Book Titles"
                     value={searchTerm}
                     onChange={handleInputChange}
                     className="border-2 border-gray-300 bg-white h-10 px-5 rounded-l-lg flex-grow focus:outline-none" 
