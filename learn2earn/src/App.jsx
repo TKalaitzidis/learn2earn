@@ -43,6 +43,8 @@ function App() {
   ];
   
   const [isAuth, setIsAuth] = useState(false);
+  const [user, setUser] = useState([]);
+  
 
   async function checkIsAuth() {
     try {
@@ -68,13 +70,20 @@ function App() {
 
       const parseRes = await response.json();
 
-      setName(parseRes.user_name);
+      setUser({
+        name : parseRes.user_name,
+        email : parseRes.user_email,
+        id : parseRes.user_id,
+        area : parseRes.user_area,
+        upoints : parseRes.user_points
+      });
+      
     } catch (error) {
       console.error(error.message);
     }
   }
 
-  const [name, setName] = useState("");
+  
   useEffect(() => {
     getName();
   });
@@ -87,7 +96,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate replace to="/home" />} />
-        <Route path="/home" element={<Main isAuth={isAuth} name={name} categories={categories}/>} />
+        <Route path="/home" element={<Main isAuth={isAuth} name={user.name} categories={categories}/>} />
         <Route
           path="/login"
           element={
@@ -112,29 +121,29 @@ function App() {
           path="/dashboard"
           element={
             isAuth ? (
-              <Dashboard name={name} isAuth={isAuth} />
+              <Dashboard name={user.name} isAuth={isAuth} />
             ) : (
               <Navigate to="/login" />
             )
           }
         />
         
-        <Route path="/contact" element={<Contact isAuth={isAuth} name={name}/>} />
-        <Route path="/about" element={<About isAuth={isAuth} name={name}/>} />
+        <Route path="/contact" element={<Contact isAuth={isAuth} name={user.name}/>} />
+        <Route path="/about" element={<About isAuth={isAuth} name={user.name}/>} />
         <Route path="/forgpass" element={<ForgPass />} />
 
         <Route
           path="/settings"
           element={
             isAuth ? (
-              <Settings setIsAuth={setIsAuth} isAuth={isAuth} name={name} />
+              <Settings setIsAuth={setIsAuth} isAuth={isAuth} name={user.name} />
             ) : (
               <Navigate to="/home" />
             )
           }
         />
         <Route path="/userchoice" element={<UserChoice />} />
-        <Route path="/profile" element={<Profile isAuth={isAuth} name={name} />} />
+        <Route path="/profile" element={<Profile isAuth={isAuth} name={user.name} area={user.area} email={user.email} upoints={user.upoints} categories={categories} />} />
       </Routes>
     </BrowserRouter>
   );

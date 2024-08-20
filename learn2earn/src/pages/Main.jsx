@@ -6,7 +6,7 @@ import { FaSearch } from "react-icons/fa";
 
 function Main({ isAuth, name, categories }) {
   const [items, setItems] = useState([]);
-  const [allBooks, setAllBooks] = useState([]); // Original list of books
+  const [allBooks, setAllBooks] = useState([]); 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentCategory, setCurrentCategory] = useState("All");
   const [currentType, setCurrentType] = useState("All Types");
@@ -74,7 +74,7 @@ function Main({ isAuth, name, categories }) {
         type: book.book_type,
       }));
 
-      setAllBooks(booksList); // Save original list
+      setAllBooks(booksList); 
       setItems(booksList);
     } catch (error) {
       console.error(error.message);

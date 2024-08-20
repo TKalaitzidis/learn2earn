@@ -16,7 +16,7 @@ function Navbar({isAuth, name}) {
                 </div>
                 <nav className="navbar">
                     <ul className="flex space-x-4">
-                        <li>{isAuth ? <h2><a href="/dashboard">{name}</a></h2>:<Link to="/login" className="text-black hover:text-gray-500 transition duration-300 ease-in-out">Login/Sign-Up</Link> }</li>
+                        <li>{isAuth ? <h2><a href="/profile">{name}</a></h2>:<Link to="/login" className="text-black hover:text-gray-500 transition duration-300 ease-in-out">Login/Sign-Up</Link> }</li>
                         <li><Link to="/about" className="text-black hover:text-gray-500 transition duration-300 ease-in-out">About</Link></li>
                         <li><Link to="/contact" className="text-black hover:text-gray-500 transition duration-300 ease-in-out">Contact</Link></li>
                     </ul>

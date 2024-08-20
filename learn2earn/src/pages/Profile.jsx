@@ -4,10 +4,11 @@ import ItemList from "../components/ItemList";
 import Sidebar from "../components/Sidebar.jsx";
 import { Link } from "react-router-dom";
 
-function Profile({ name, isAuth }) {
+function Profile({ name, isAuth, area, email, upoints, categories }) {
   const [items, setItems] = useState([]);
   const [isOverlay, setIsOverlay] = useState(false);
-
+  const [allBooks, setAllBooks] = useState([]); 
+  
   const toggleOverlay = () => {
     setIsOverlay(!isOverlay);
   };
@@ -35,56 +36,33 @@ function Profile({ name, isAuth }) {
     }
   };
 
-  const genres = [
-    "Adventure",
-    "Biography",
-    "Children's",
-    "Classics",
-    "Comics",
-    "Contemporary",
-    "Cookbooks",
-    "Crime",
-    "Drama",
-    "Dystopian",
-    "Fantasy",
-    "Graphic Novels",
-    "Historical Fiction",
-    "Horror",
-    "Humor",
-    "Literary Fiction",
-    "Memoir",
-    "Mystery",
-    "Non-Fiction",
-    "Paranormal",
-    "Philosophy",
-    "Poetry",
-    "Psychology",
-    "Religion",
-    "Romance",
-    "Science",
-    "Science Fiction",
-    "Self-Help",
-    "Short Stories",
-    "Suspense",
-    "Spirituality",
-    "Sports",
-    "Thriller",
-    "Travel",
-    "True Crime",
-    "Young Adult",
-  ];
+  const [currentUser, setCurrentUser] = useState(name);
 
-  const [currentUser, setCurrentUser] = useState(name); // State for current user
+  const [currentCategory, setCurrentCategory] = useState("All");
+  const [currentType, setCurrentType] = useState("All Types"); 
+  
+  const handleCategoryChange = (selectedCategory) => {
+    setCurrentCategory(selectedCategory);
+    if (selectedCategory === "All") {
+      setItems(allBooks);
+    } else {
+      const filteredBooks = allBooks.filter(
+        (book) => book.genre === selectedCategory
+      );
+      setItems(filteredBooks);
+    }
+  };
 
-  const [currentCategory, setCurrentCategory] = useState("All"); // State for current category
-  const categories = ["All", "Sci-Fi", "Fantasy", "Adventure", "Fiction", "Dystopian"]; 
-
-  const user = {
-    name: name,
-    location: "Athens",
-    points: 120,
-    booksOffering: 50,
-    email: "chrisiscool@gmail.com",
+  const handleTypeChange = (selectedType) => {
+    setCurrentType(selectedType);
+    if (selectedType === "All Types") {
+      setItems(allBooks);
+    } else {
+      const filteredBooks = allBooks.filter(
+        (book) => book.type === selectedType
+      );
+      setItems(filteredBooks);
+    }
   };
 
   async function userbooks() {
@@ -108,6 +86,7 @@ function Profile({ name, isAuth }) {
       }));
 
       setItems(userBooks);
+      setAllBooks(userBooks);
     } catch (error) {
       console.error(error.message);
     }
@@ -132,18 +111,18 @@ function Profile({ name, isAuth }) {
         <div className="ml-4 w-full">
           <div className="flex flex-col md:flex-row justify-between">
             <h2 className="text-lg font-medium m-2 pr-20 md:mb-0">
-              {user.name}
+              {name}
             </h2>
             <div className="flex flex-col md:flex-row justify-between w-full md:ml-4">
               <div className="flex flex-col mb-2 md:mb-0 md:mr-4">
-                <p className="text-gray-600">Location: {user.location}</p>
-                <p className="text-gray-600">Points: {user.points}</p>
+                <p className="text-gray-600">Location: {area}</p>
+                <p className="text-gray-600">Points: {upoints}</p>
               </div>
               <div className="flex flex-col">
                 <p className="text-gray-600">
-                  Books Offering: {user.booksOffering}
+                  Books Offering: {items.length}
                 </p>
-                <p className="text-gray-600">E-mail: {user.email}</p>
+                <p className="text-gray-600">E-mail: {email}</p>
               </div>
             </div>
           </div>
@@ -214,7 +193,7 @@ function Profile({ name, isAuth }) {
                 </label>
                 <div className="mb-4 flex flex-col border border-gray-300 p-2 rounded">
                   <select required className="outline-none">
-                    {genres.map((genre) => (
+                    {categories.map((genre) => (
                       <option key={genre} value={genre}>
                         {genre}
                       </option>
@@ -256,7 +235,10 @@ function Profile({ name, isAuth }) {
         <ItemList username={name} isMain={false} items={items} />
         <Sidebar
           categories={categories}
-          onCategoryChange={setCurrentCategory}
+          onCategoryChange={handleCategoryChange}
+          onTypeChange={handleTypeChange}
+          currentCategory={currentCategory}
+          currentType={currentType}
         />
       </div>
     </div>
