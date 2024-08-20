@@ -6,10 +6,10 @@ import { FaSearch } from "react-icons/fa";
 
 function Main({ isAuth, name, categories }) {
   const [items, setItems] = useState([]);
-
+  const [allBooks, setAllBooks] = useState([]); // Original list of books
   const [searchTerm, setSearchTerm] = useState('');
-
   const [currentCategory, setCurrentCategory] = useState("All"); 
+  const [currentType, setCurrentType] = useState("All Types");
 
   const onSearch = async (e) => {
     e.preventDefault();
@@ -32,15 +32,26 @@ function Main({ isAuth, name, categories }) {
     }
   };
 
-  const handleCategoryChange = (currentCategory, books = items) => {
-    if (currentCategory === "All"){
-      setItems(books);
-    }
-    else{
-      const filtered = books.filter((book) => book.genre === currentCategory);
-      setItems(filtered);
+  const handleCategoryChange = (selectedCategory) => {
+    setCurrentCategory(selectedCategory);
+    if (selectedCategory === "All") {
+      setItems(allBooks);
+    } else {
+      const filteredBooks = allBooks.filter((book) => book.genre === selectedCategory);
+      setItems(filteredBooks);
     }
   }
+
+  const handleTypeChange = (selectedType) => {
+    setCurrentType(selectedType);
+    if (selectedType === "All Types") {
+      setItems(allBooks);
+    } else {
+      const filteredBooks = allBooks.filter((book) => book.type === selectedType);
+      setItems(filteredBooks);
+    }
+  }
+
 
   async function getBooks() {
     try {
@@ -58,7 +69,8 @@ function Main({ isAuth, name, categories }) {
         type: book.book_type,
       }));
 
-      setItems(booksList);
+      setAllBooks(booksList); // Save original list
+      setItems(booksList);     // Initialize display list
     } catch (error) {
       console.error(error.message);
     }
@@ -68,10 +80,6 @@ function Main({ isAuth, name, categories }) {
     getBooks();
   }, []);
 
-  useEffect(() => {
-    handleCategoryChange(currentCategory);
-  }, [currentCategory])  
-
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar
@@ -79,7 +87,6 @@ function Main({ isAuth, name, categories }) {
         isAuth={isAuth}
         name={name}
       />
-
 
       {/* SEARCH BAR */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -102,10 +109,12 @@ function Main({ isAuth, name, categories }) {
         </div>
         {/* SEARCH BAR */}
 
-
         <Sidebar
           categories={categories}
-          onCategoryChange={setCurrentCategory}
+          onCategoryChange={handleCategoryChange} 
+          onTypeChange={handleTypeChange}
+          currentCategory={currentCategory}
+          currentType={currentType}
         />
         <ItemList items={items} isMain={true} setItems={setItems} />
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function Sidebar({ categories, onCategoryChange, onTypeChange }) {
+function Sidebar({ categories, onCategoryChange, onTypeChange, currentCategory, currentType}) {
 
   const [isDropDownActive, setIsDropDownActive] = useState(false);
 
@@ -37,7 +37,9 @@ function Sidebar({ categories, onCategoryChange, onTypeChange }) {
         >
           {categories.map((category) => (
             <li
-              className="px-2 py-1 cursor-pointer hover:bg-gray-200"
+              className={`px-2 py-1 cursor-pointer hover:bg-gray-200 ${
+                currentCategory === category ? "italic font-semibold" : ""
+              }`}
               key={category}
               onClick={() => onCategoryChange(category)}
             >
@@ -60,15 +62,30 @@ function Sidebar({ categories, onCategoryChange, onTypeChange }) {
           }}
         >
           <li
-            className="px-2 py-1 cursor-pointer hover:bg-gray-200"
-            onClick={() => onTypeChange("Physical")}
-          >
+              className={`px-2 py-1 cursor-pointer hover:bg-gray-200 ${
+                currentType === "All Types" ? "italic font-semibold" : ""
+              }`}
+
+              onClick={() => onTypeChange("All Types")}
+            >
+            All Types
+          </li>
+          <li
+              className={`px-2 py-1 cursor-pointer hover:bg-gray-200 ${
+                currentType === "Physical" ? "italic font-semibold" : ""
+              }`}
+
+              onClick={() => onTypeChange("Physical")}
+            >
             Physical
           </li>
           <li
-            className="px-2 py-1 cursor-pointer hover:bg-gray-200"
-            onClick={() => onTypeChange("PDF")}
-          >
+              className={`px-2 py-1 cursor-pointer hover:bg-gray-200 ${
+                currentType === "PDF" ? "italic font-semibold" : ""
+              }`}
+
+              onClick={() => onTypeChange("PDF")}
+            >
             PDF
           </li>
         </ul>
