@@ -3,12 +3,22 @@ import Navbar from "../components/Navbar";
 import ItemList from "../components/ItemList";
 import Sidebar from "../components/Sidebar.jsx";
 import { Link } from "react-router-dom";
+import Item from "../components/Item.jsx";
 
-function Profile({ name, isAuth, area, email, upoints, categories }) {
+function Profile({ name, isAuth, area, email, upoints, categories, u_id, isDiffUser }) {
   const [items, setItems] = useState([]);
   const [isOverlay, setIsOverlay] = useState(false);
   const [allBooks, setAllBooks] = useState([]); 
-  
+  const [input, setInput] = useState({
+    book_name: '',
+    book_author: '',
+    book_genre: 'Sci-fi',
+    book_type: 'Physical',
+    user_id: ''
+  })
+
+  const inpCategories = categories.filter(item => item !=="All");  
+
   const toggleOverlay = () => {
     setIsOverlay(!isOverlay);
   };
@@ -18,25 +28,6 @@ function Profile({ name, isAuth, area, email, upoints, categories }) {
       setIsOverlay(false);
     }
   };
-
-  const handlePointsChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    if (value >= 1 && value <= 5) {
-      setPoints(value);
-    } else if (e.target.value === "") {
-      setPoints("");
-    }
-  };
-
-  const handleBlur = () => {
-    if (points === "" || points < 1) {
-      setPoints(1);
-    } else if (points > 5) {
-      setPoints(5);
-    }
-  };
-
-  const [currentUser, setCurrentUser] = useState(name);
 
   const [currentCategory, setCurrentCategory] = useState("All");
   const [currentType, setCurrentType] = useState("All Types"); 
@@ -87,15 +78,37 @@ function Profile({ name, isAuth, area, email, upoints, categories }) {
 
       setItems(userBooks);
       setAllBooks(userBooks);
+      if(!isDiffUser){
+        setInput({...input, user_id: u_id});
+      }
     } catch (error) {
       console.error(error.message);
     }
   }
 
-  useEffect(() => {
-    userbooks();
-  }, [name]);
+  const submit = async (e) =>{
+    e.preventDefault()
 
+    try {
+      const response = await fetch(
+        `http://localhost:8000/books/submit`,
+        {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(input)
+        }
+      );
+
+      await response.text();
+      
+      userbooks();
+      setIsOverlay(false);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+  userbooks();
+  
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar isAuth={isAuth} name={name} />
@@ -129,109 +142,119 @@ function Profile({ name, isAuth, area, email, upoints, categories }) {
         </div>
       </div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="flex justify-center space-x-4 mb-8">
-          <button
-            className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
-            onClick={toggleOverlay}
-          >
-            Add New Book
-          </button>
-
-          <Link to="/settings">
-            <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">
-              User Settings
+        {!isDiffUser && (<div><div className="flex justify-center space-x-4 mb-8">
+            <button
+              className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
+              onClick={toggleOverlay}
+            >
+              Add New Book
             </button>
-          </Link>
-        </div>
-        {isOverlay && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-            onClick={handleOverlayClick}
-          >
-            <div className="bg-white rounded-lg shadow-md overflow-hidden w-96 relative">
-              <button
-                className="absolute top-2 right-2 text-black text-xl"
-                onClick={() => setIsOverlay(false)}
-              >
-                &times;
-              </button>
-              <form className="p-6">
-                <h2 className="text-lg font-semibold mb-4">Book Submission</h2>
-                <div className="mb-4">
-                  <label
-                    htmlFor="title"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label
-                    htmlFor="author"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Author
-                  </label>
-                  <input
-                    type="text"
-                    id="author"
-                    name="author"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                  />
-                </div>
-                <label
-                  htmlFor="genre"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Genre
-                </label>
-                <div className="mb-4 flex flex-col border border-gray-300 p-2 rounded">
-                  <select required className="outline-none">
-                    {categories.map((genre) => (
-                      <option key={genre} value={genre}>
-                        {genre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label
-                    htmlFor="points"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Points
-                  </label>
-                  <input
-                    type="number"
-                    id="points"
-                    name="points"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    min="1"
-                    max="5"
-                    defaultValue="1"
-                    onChange={handlePointsChange}
-                    onBlur={handleBlur}
-                  />
-                </div>
 
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
-                  >
-                    Submit
-                  </button>
-                </div>
-              </form>
-            </div>
+            <Link to="/settings">
+              <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">
+                User Settings
+              </button>
+            </Link>
           </div>
-        )}
+          {isOverlay && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+              onClick={handleOverlayClick}
+            >
+              <div className="bg-white rounded-lg shadow-md overflow-hidden w-96 relative">
+                <button
+                  className="absolute top-2 right-2 text-black text-xl"
+                  onClick={() => setIsOverlay(false)}
+                >
+                  &times;
+                </button>
+                <form
+                onSubmit={submit}
+                className="p-6">
+                  
+                  <h2 className="text-lg font-semibold mb-4">Book Submission</h2>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="title"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      value={input.book_name}
+                      onChange={(e) => setInput({...input, book_name: e.target.value})}
+                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="author"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Author
+                    </label>
+                    <input
+                      type="text"
+                      id="author"
+                      name="author"
+                      value={input.book_author}
+                      onChange={(e) => setInput({...input, book_author: e.target.value})}
+                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                    />
+                  </div>
+                  <label
+                    htmlFor="genre"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Genre
+                  </label>
+                  <div className="mb-4 flex flex-col border border-gray-300 p-2 rounded">
+                    <select 
+                    value={input.book_genre}
+                    onChange={(e) => setInput({...input, book_genre: e.target.value})}
+                    required className="outline-none">
+                      {inpCategories.map((genre) => (
+                        <option key={genre} value={genre}>
+                          {genre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <label
+                    htmlFor="type"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Type
+                  </label>
+                  <div className="mb-4 flex flex-col border border-gray-300 p-2 rounded">
+                    <select 
+                    value={input.book_type}
+                    onChange={(e) => setInput({...input, book_type: e.target.value})}
+                    required className="outline-none">
+                    <option key="Physical" value="Physical">
+                      Physical
+                    </option>
+                      <option key="PDF" value="PDF">
+                        PDF
+                      </option>                  
+                    </select>
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}</div>)}  
+          
         <ItemList username={name} isMain={false} items={items} />
         <Sidebar
           categories={categories}

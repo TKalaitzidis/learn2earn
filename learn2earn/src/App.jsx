@@ -103,7 +103,7 @@ function App() {
             !isAuth ? (
               <Login setIsAuth={setIsAuth} isAuth={isAuth} />
             ) : (
-              <Navigate to="/dashboard" />
+              <Navigate to="/profile" />
             )
           }
         />
@@ -113,7 +113,7 @@ function App() {
             !isAuth ? (
               <Register setIsAuth={setIsAuth} isAuth={isAuth} />
             ) : (
-              <Navigate to="/dashboard" />
+              <Navigate to="/profile" />
             )
           }
         />
@@ -143,7 +143,7 @@ function App() {
           }
         />
         <Route path="/userchoice" element={<UserChoice />} />
-        <Route path="/profile" element={<Profile isAuth={isAuth} name={user.name} area={user.area} email={user.email} upoints={user.upoints} categories={categories} />} />
+        <Route path="/profile" element={<Profile isAuth={isAuth} name={user.name} area={user.area} email={user.email} upoints={user.upoints} categories={categories} u_id={user.id} />} />
       </Routes>
     </BrowserRouter>
   );

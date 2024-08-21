@@ -4,7 +4,7 @@ import { RiLockPasswordFill } from "react-icons/ri";
 import { MdEmail } from "react-icons/md";
 import { useState } from "react";
 
-function Register(setIsAuth) {
+function Register({setIsAuth, isAuth}) {
   const cities = [
     "Athens",
     "Thessaloniki",
@@ -16,8 +16,8 @@ function Register(setIsAuth) {
     "Ioannina",
     "Chania",
     "Chalcis",
-  ]; // Add more cities as required
-
+  ]; 
+  
   const [data, setData] = useState({
     email: '',
     username: '',
@@ -47,7 +47,7 @@ function Register(setIsAuth) {
       else{
         setIsAuth(false)
       }
-
+      
     } catch (error) {
       console.error(error.message)
     }

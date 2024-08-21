@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function Item({book, isMain}) {
 
@@ -95,7 +96,7 @@ function Item({book, isMain}) {
                     key={index}
                     className="flex justify-between items-center text-gray-600 p-2 border-b border-gray-200 last:border-0"
                   >
-                    <p>{user.user_name} ({user.user_area})</p>
+                    <Link>{user.user_name} ({user.user_area})</Link>
                     <button className="ml-4 bg-gray-900 hover:bg-black text-white font-bold py-1 px-2 rounded">
                       Choose
                     </button>

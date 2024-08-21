@@ -44,32 +44,39 @@ router.post("/submit", async (req, res) => {
     const { book_name, book_author, book_genre, book_type, user_id } = req.body;
 
     const submitcheck = await pool.query("SELECT * FROM books WHERE book_name=$1", [book_name]);
-    const cond =submitcheck.rows[0]
+    const cond = submitcheck.rows[0];
 
-    if(cond){
-      const userOwns = await pool.query("SELECT entry_id FROM booksentry JOIN userbase ON booksentry.u_id = userbase.user_id" +
-         "JOIN books ON booksentry.b_id = books.book_id WHERE userbase.user_id=$1 AND book_name = $2;", [user_id, book_name]);
-         
-      if(userOwns){
-        res.send(false);
+    if (cond) {
+      const userOwns = await pool.query(
+        `SELECT entry_id FROM booksentry 
+         JOIN userbase ON booksentry.u_id = userbase.user_id 
+         JOIN books ON booksentry.b_id = books.book_id 
+         WHERE userbase.user_id = $1 AND books.book_name = $2;`,
+        [user_id, book_name]
+      );
+
+      if (userOwns.rows.length > 0) {
+        res.send("User already owns the book");
+      } else {
+        await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [cond.book_id.toString(), user_id]);
+        await pool.query("UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;", [user_id]);
+        res.send("Submitted successfully");
       }
-      else{
-        const submit = await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [cond.book_id.toString(),user_id]);
-        res.send("Submitted succesfully");
-      }
-      
+    } else {
+      const booksubmit = await pool.query(
+        "INSERT INTO books (book_name, book_author, book_genre, book_type) VALUES ($1, $2, $3, $4) RETURNING book_id;",
+        [book_name, book_author, book_genre, book_type]
+      );
+
+      await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [booksubmit.rows[0].book_id.toString(), user_id]);
+      await pool.query("UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;", [user_id]);
+      res.send("New book submitted successfully");
     }
-    else{
-      const booksubmit= await pool.query("INSERT INTO books (book_name, book_author, book_genre, book_type)"+
-      " VALUES ($1, $2, $3, $4);", [book_name, book_author, book_genre, book_type]);
-      const submit = await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [submission.rows[0].book_id.toString(),user_id]);
-      res.send("New book submitted succesfully");
-    };
-
   } catch (error) {
-    res.status(500).json("Server error");
-
+    console.error("Error during book submission:", error);
+    res.status(500).json({ error: "Server error", details: error.message });
   }
-})
+});
+
 
 module.exports = router;
