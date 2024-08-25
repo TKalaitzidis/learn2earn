@@ -76,6 +76,7 @@ function Main({ isAuth, name, categories }) {
 
       setAllBooks(booksList); 
       setItems(booksList);
+      console.log(items);
     } catch (error) {
       console.error(error.message);
     }
@@ -83,6 +84,7 @@ function Main({ isAuth, name, categories }) {
 
   useEffect(() => {
     getBooks();
+    
   }, []);
 
   if (!isAuth) {

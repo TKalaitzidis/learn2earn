@@ -1,32 +1,46 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import Profile from "../pages/Profile";
+import { useNavigate } from "react-router-dom";
 
-function Item({book, isMain}) {
-
+function Item({ book, isMain }) {
   const [items, setItems] = useState([]);
+  const [user, setUser] = useState([]);
+
+  const navigate = useNavigate();
 
   async function whoOwns() {
     try {
-      const response = await fetch(`http://localhost:8000/books/whoowns?book_name=${encodeURIComponent(book.name)}`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `http://localhost:8000/books/whoowns?book_name=${encodeURIComponent(
+          book.name
+        )}`,
+        {
+          method: "GET",
+        }
+      );
 
       const parseRes = await response.json();
 
-      const userList = parseRes.map(user => ({
+      const userList = parseRes.map((user) => ({
         user_name: user.user_name,
-        user_area: user.user_area
+        user_email: user.user_email,
+        user_area: user.user_area,
+        user_points: user.user_points
       }));
 
-      
       setItems(userList);
-
+      console.log(items);
     } catch (error) {
       console.error(error.message);
     }
   }
 
-  
+  const handleProfile = (owner) => {
+    
+    localStorage.setItem('owner', JSON.stringify(owner));
+    navigate("/profile");
+  }
+
   const [isClicked, setIsClicked] = useState(false);
 
   const toggleOverlay = () => {
@@ -79,7 +93,9 @@ function Item({book, isMain}) {
               &times;
             </button>
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">{book.name}</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                {book.name}
+              </h2>
               <p className="text-gray-600">{book.author}</p>
               <p className="text-gray-600">
                 Cost: {book.points} {book.points > 1 ? "points" : "point"}
@@ -91,12 +107,22 @@ function Item({book, isMain}) {
                 This book is offered by the following users:
               </p>
               <div className="overflow-y-auto max-h-64 border border-gray-200 rounded-lg p-2">
-                {items.map((user, index) => (
+                {items.map((owner, index) => (
                   <div
                     key={index}
                     className="flex justify-between items-center text-gray-600 p-2 border-b border-gray-200 last:border-0"
                   >
-                    <Link>{user.user_name} ({user.user_area})</Link>
+                    <a
+
+                      href = "/profile"
+                      onClick={(e) => {
+                        e.preventDefault(); 
+                        handleProfile(owner);
+                      }}
+                    
+                    >
+                      {owner.user_name} ({owner.user_area})
+                    </a>
                     <button className="ml-4 bg-gray-900 hover:bg-black text-white font-bold py-1 px-2 rounded">
                       Choose
                     </button>

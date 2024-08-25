@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useMemo, useRef  } from "react";
 import Navbar from "../components/Navbar";
 import ItemList from "../components/ItemList";
 import Sidebar from "../components/Sidebar.jsx";
 import { Link } from "react-router-dom";
-import Item from "../components/Item.jsx";
 
-function Profile({ name, isAuth, area, email, upoints, categories, u_id, isDiffUser }) {
+
+function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
+  const isInitialMount = useRef(true);
+  
   const [items, setItems] = useState([]);
   const [isOverlay, setIsOverlay] = useState(false);
   const [allBooks, setAllBooks] = useState([]); 
@@ -16,6 +18,58 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id, isDiffU
     book_type: 'Physical',
     user_id: ''
   })
+  const [user, setUser] = useState({
+    name: name,
+    email: email,
+    area: area,
+    points: upoints
+  })
+
+
+  const storedOwner = JSON.parse(localStorage.getItem('owner'));
+  const isStoredOwnerNameNull = storedOwner ? storedOwner.user_name === null : true;
+  
+
+  const memoizedUser = useMemo(() => {
+    if (isInitialMount.current) {
+        isInitialMount.current = false;
+
+        if (storedOwner && !isStoredOwnerNameNull) {
+            localStorage.removeItem('owner');
+            console.log("run store")
+            return {
+                name: storedOwner.user_name,
+                email: storedOwner.user_email,
+                area: storedOwner.user_area,
+                points: storedOwner.user_points,
+            };
+        } else {
+            console.log("run norm")
+            return {
+              
+                name: name,
+                email: email,
+                area: area,
+                points: upoints,
+            };
+        }
+    } else {
+      console.log("run norm2")
+        return {
+            name: name,
+            email: email,
+            area: area,
+            points: upoints,
+        };
+    }
+}, [storedOwner, isStoredOwnerNameNull, name, email, area, upoints]);
+
+
+  // Update user state based on memoized value
+  useMemo(() => {
+    setUser(memoizedUser);
+  }, []);
+
 
   const inpCategories = categories.filter(item => item !=="All");  
 
@@ -44,6 +98,8 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id, isDiffU
     }
   };
 
+  
+
   const handleTypeChange = (selectedType) => {
     setCurrentType(selectedType);
     if (selectedType === "All Types") {
@@ -56,11 +112,13 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id, isDiffU
     }
   };
 
+  const isDiffUser = false;
+
   async function userbooks() {
     try {
       const response = await fetch(
         `http://localhost:8000/books/userbooks?username=${encodeURIComponent(
-          name
+          user.name
         )}`,
         {
           method: "GET",
@@ -107,7 +165,10 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id, isDiffU
       console.error(error.message);
     }
   }
-  userbooks();
+  
+  useEffect(() => {
+    userbooks();
+  });
   
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -124,18 +185,18 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id, isDiffU
         <div className="ml-4 w-full">
           <div className="flex flex-col md:flex-row justify-between">
             <h2 className="text-lg font-medium m-2 pr-20 md:mb-0">
-              {name}
+              {user.name}
             </h2>
             <div className="flex flex-col md:flex-row justify-between w-full md:ml-4">
               <div className="flex flex-col mb-2 md:mb-0 md:mr-4">
-                <p className="text-gray-600">Location: {area}</p>
-                <p className="text-gray-600">Points: {upoints}</p>
+                <p className="text-gray-600">Location: {user.area}</p>
+                <p className="text-gray-600">Points: {user.points}</p>
               </div>
               <div className="flex flex-col">
                 <p className="text-gray-600">
                   Books Offering: {items.length}
                 </p>
-                <p className="text-gray-600">E-mail: {email}</p>
+                <p className="text-gray-600">E-mail: {user.email}</p>
               </div>
             </div>
           </div>
@@ -255,7 +316,7 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id, isDiffU
             </div>
           )}</div>)}  
           
-        <ItemList username={name} isMain={false} items={items} />
+        <ItemList username={user.name} isMain={false} items={items} />
         <Sidebar
           categories={categories}
           onCategoryChange={handleCategoryChange}
