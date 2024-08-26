@@ -4,7 +4,7 @@ import Item from "./Item";
 import Pagination from "./Pagination";
 
 
-function ItemList({items, username, isMain, setItems}) {
+function ItemList({items, username, willOverlay, setItems}) {
     const [currentPage, setCurrentPage] = useState(1);
     
     const itemsPerPage = 20;
@@ -41,7 +41,7 @@ function ItemList({items, username, isMain, setItems}) {
                     </thead>
                     <tbody className="w-max border ">
                     {currentItems.map((item, index) => (
-                            <Item name={username} key={index} book={item} isMain={isMain} setItems={setItems}/>
+                            <Item name={username} key={index} book={item} willOverlay={willOverlay} setItems={setItems}/>
                     ))}
                     </tbody>
                 </table>

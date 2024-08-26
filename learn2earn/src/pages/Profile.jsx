@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef  } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 import Navbar from "../components/Navbar";
 import ItemList from "../components/ItemList";
 import Sidebar from "../components/Sidebar.jsx";
@@ -6,7 +7,8 @@ import { Link } from "react-router-dom";
 
 
 function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
-  const isInitialMount = useRef(true);
+  const location = useLocation();
+  const queryParams = location.state;
   
   const [items, setItems] = useState([]);
   const [isOverlay, setIsOverlay] = useState(false);
@@ -16,60 +18,16 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
     book_author: '',
     book_genre: 'Sci-fi',
     book_type: 'Physical',
-    user_id: ''
-  })
+    user_id: u_id,
+  });
+
+
   const [user, setUser] = useState({
-    name: name,
-    email: email,
-    area: area,
-    points: upoints
-  })
-
-
-  const storedOwner = JSON.parse(localStorage.getItem('owner'));
-  const isStoredOwnerNameNull = storedOwner ? storedOwner.user_name === null : true;
-  
-
-  const memoizedUser = useMemo(() => {
-    if (isInitialMount.current) {
-        isInitialMount.current = false;
-
-        if (storedOwner && !isStoredOwnerNameNull) {
-            localStorage.removeItem('owner');
-            console.log("run store")
-            return {
-                name: storedOwner.user_name,
-                email: storedOwner.user_email,
-                area: storedOwner.user_area,
-                points: storedOwner.user_points,
-            };
-        } else {
-            console.log("run norm")
-            return {
-              
-                name: name,
-                email: email,
-                area: area,
-                points: upoints,
-            };
-        }
-    } else {
-      console.log("run norm2")
-        return {
-            name: name,
-            email: email,
-            area: area,
-            points: upoints,
-        };
-    }
-}, [storedOwner, isStoredOwnerNameNull, name, email, area, upoints]);
-
-
-  // Update user state based on memoized value
-  useMemo(() => {
-    setUser(memoizedUser);
-  }, []);
-
+    name: queryParams?.user_name || name,
+    email: queryParams?.user_email || email,
+    area: queryParams?.user_area || area,
+    points: queryParams?.user_points || upoints,
+  });
 
   const inpCategories = categories.filter(item => item !=="All");  
 
@@ -168,6 +126,12 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
   
   useEffect(() => {
     userbooks();
+    setUser({
+      name: queryParams?.user_name || name,
+      email: queryParams?.user_email || email,
+      area: queryParams?.user_area || area,
+      points: queryParams?.user_points || upoints,
+    });
   });
   
   return (
@@ -203,7 +167,7 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
         </div>
       </div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        {!isDiffUser && (<div><div className="flex justify-center space-x-4 mb-8">
+        {!queryParams && (<div><div className="flex justify-center space-x-4 mb-8">
             <button
               className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
               onClick={toggleOverlay}
@@ -316,7 +280,7 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
             </div>
           )}</div>)}  
           
-        <ItemList username={user.name} isMain={false} items={items} />
+        <ItemList username={user.name} willOverlay={queryParams ? true : false} items={items} />
         <Sidebar
           categories={categories}
           onCategoryChange={handleCategoryChange}

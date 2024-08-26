@@ -76,7 +76,6 @@ function Main({ isAuth, name, categories }) {
 
       setAllBooks(booksList); 
       setItems(booksList);
-      console.log(items);
     } catch (error) {
       console.error(error.message);
     }
@@ -162,7 +161,7 @@ function Main({ isAuth, name, categories }) {
           currentCategory={currentCategory}
           currentType={currentType}
         />
-        <ItemList items={items} isMain={true} setItems={setItems} />
+        <ItemList items={items} willOverlay={true} setItems={setItems} />
       </div>
     </div>
   );

@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-import Profile from "../pages/Profile";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-function Item({ book, isMain }) {
+function Item({ book, willOverlay }) {
   const [items, setItems] = useState([]);
-  const [user, setUser] = useState([]);
-
   const navigate = useNavigate();
 
   async function whoOwns() {
@@ -36,10 +33,15 @@ function Item({ book, isMain }) {
   }
 
   const handleProfile = (owner) => {
-    
-    localStorage.setItem('owner', JSON.stringify(owner));
-    navigate("/profile");
-  }
+    navigate(`/profile`, {
+      state: {
+        user_name: owner.user_name,
+        user_email: owner.user_email,
+        user_area: owner.user_area,
+        user_points: owner.user_points,
+      },
+    });
+  };
 
   const [isClicked, setIsClicked] = useState(false);
 
@@ -80,7 +82,7 @@ function Item({ book, isMain }) {
           {book.type}
         </td>
       </tr>
-      {isClicked && isMain && (
+      {isClicked && willOverlay && (
         <div
           className="overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
           onClick={handleOverlayClick}
@@ -116,6 +118,7 @@ function Item({ book, isMain }) {
 
                       href = "/profile"
                       onClick={(e) => {
+                        toggleOverlay(e)
                         e.preventDefault(); 
                         handleProfile(owner);
                       }}
@@ -124,7 +127,7 @@ function Item({ book, isMain }) {
                       {owner.user_name} ({owner.user_area})
                     </a>
                     <button className="ml-4 bg-gray-900 hover:bg-black text-white font-bold py-1 px-2 rounded">
-                      Choose
+                      <Link>Choose</Link>
                     </button>
                   </div>
                 ))}
