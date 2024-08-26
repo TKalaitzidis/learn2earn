@@ -280,7 +280,7 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
             </div>
           )}</div>)}  
           
-        <ItemList username={user.name} willOverlay={queryParams ? true : false} items={items} />
+        <ItemList username={user.name} willOverlay={queryParams ? true : false} items={items} logged_name={name} />
         <Sidebar
           categories={categories}
           onCategoryChange={handleCategoryChange}

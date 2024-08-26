@@ -10,6 +10,7 @@ function Login({setIsAuth, isAuth}) {
         username: '',
         password: ''
       })
+      
     const loginUser = async (e) => {
         e.preventDefault()
         try {
@@ -59,10 +60,7 @@ function Login({setIsAuth, isAuth}) {
               />
             </div>
             <div className="remember-forgot flex justify-between items-center text-sm">
-              <label className="flex items-center">
-                <input type="checkbox" className="form-checkbox" />
-                <span className="ml-2">Remember me</span>
-              </label>
+              
               <a
                 href="/forgpass"
                 className="text-black font-bold hover:text-gray-700"

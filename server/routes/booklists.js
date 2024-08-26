@@ -16,7 +16,7 @@ router.get("/itemlist", async (req, res) => {
 router.get("/whoowns", async (req, res) => {
   try {
     const users = await pool.query(
-      "SELECT userbase.user_name, userbase.user_email, userbase.user_area, userbase.user_points FROM booksentry JOIN userbase ON booksentry.u_id "+
+      "SELECT userbase.user_name, userbase.user_email, userbase.user_area, userbase.user_points, userbase.user_id FROM booksentry JOIN userbase ON booksentry.u_id "+
       "= userbase.user_id JOIN books ON booksentry.b_id = books.book_id WHERE books.book_name = $1;",
       [req.query.book_name]
     );
@@ -78,6 +78,29 @@ router.post("/submit", async (req, res) => {
     res.status(500).json({ error: "Server error", details: error.message });
   }
 });
+
+router.post("/transact", async (req, res) => {
+  try {
+    const { book_name, owner_name, buyer_name, buyer_id, owner_id } = req.body;
+
+    const bookres = await pool.query("SELECT * FROM books WHERE book_name = $1;", [book_name]);
+    const book = bookres.rows[0];
+    const pointsCheck = await pool.query("SELECT * FROM userbase WHERE user_points>$1 AND user_name=$2;", [book.book_points, buyer_name]);
+
+    if (pointsCheck.rows.length > 0){
+      await pool.query("UPDATE userbase SET user_points = user_points + $1 WHERE user_name = $2;", [book.book_points, owner_name]);
+      await pool.query("UPDATE userbase SET user_points = user_points - $1 WHERE user_name = $2;", [book.book_points, buyer_name]);
+      await pool.query("DELETE FROM booksentry WHERE b_id = $1 AND u_id = $2;", [book.book_id, owner_id]);
+      res.send("Transaction successful.");
+    }
+    else{
+      res.send("User doesnt have enough points to buy this book");
+    }
+  } catch (error) {
+    console.error("Error during transaction:", error);
+    res.status(500).json({ error:"Server error", details: error.message });
+  }
+})
 
 
 module.exports = router;

@@ -1,17 +1,55 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar.jsx";
 import ToC from "../components/ToC.jsx";
-import { useLocation } from "react-router-dom";
+import {useNavigate, useLocation } from "react-router-dom";
 
 function UserChoice({ isAuth, name, area, email, u_id }) {
   const location = useLocation();
   const queryParams = location.state;
 
+  const navigate = useNavigate();
+
+  
+  
+  const [transInfo, setTransInfo] = useState({
+    book_name : queryParams.book.name,
+    owner_name : queryParams.user_name,
+    buyer_name : name,
+    buyer_id: u_id,
+    owner_id : queryParams.user_id
+  })
+  
   const [isClicked, setIsClicked] = useState(false);
 
   const toggleOverlay = () => {
     setIsClicked(!isClicked);
   };
+
+  const transact = async (e) =>{
+    e.preventDefault()
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/books/transact`,
+        {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(transInfo)
+        }
+      );
+
+      if (response.ok) {
+        console.log(response);
+        navigate(`/profile`);
+      } else {
+
+        console.error("Failed to submit the transaction.");
+      }
+      navigate(`/profile`);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
 
   const handleOverlayClick = (e) => {
     if (e.target.classList.contains("overlay")) {
@@ -31,7 +69,9 @@ function UserChoice({ isAuth, name, area, email, u_id }) {
             Please add your Home address so we can notify the user to send you
             the book.
           </h2>
-          <form>
+          <form
+            onSubmit={transact}
+          >
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
@@ -140,6 +180,7 @@ function UserChoice({ isAuth, name, area, email, u_id }) {
             <div className="flex mt-5 justify-center">
                     <button
                       type="submit"
+                      
                       className="bg-black text-white px-10 py-2 rounded-md hover:bg-gray-800"
                     >
                       Submit

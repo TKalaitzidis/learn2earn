@@ -161,7 +161,7 @@ function Main({ isAuth, name, categories }) {
           currentCategory={currentCategory}
           currentType={currentType}
         />
-        <ItemList items={items} willOverlay={true} setItems={setItems} />
+        <ItemList items={items} willOverlay={true} setItems={setItems} logged_name={name}/>
       </div>
     </div>
   );
