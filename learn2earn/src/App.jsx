@@ -142,7 +142,7 @@ function App() {
             )
           }
         />
-        <Route path="/userchoice" element={<UserChoice />} />
+        <Route path="/userchoice" element={<UserChoice isAuth={isAuth} name={user.name} area={user.area} email={user.email} u_id={user.id}/>} />
         <Route path="/profile" element={<Profile isAuth={isAuth} name={user.name} area={user.area} email={user.email} upoints={user.upoints} categories={categories} u_id={user.id} />} />
       </Routes>
     </BrowserRouter>

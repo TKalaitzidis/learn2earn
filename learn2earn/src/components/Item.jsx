@@ -86,7 +86,7 @@ function Item({ book, willOverlay }) {
         <div
           className="overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
           onClick={handleOverlayClick}
-        >
+        > 
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl relative">
             <button
               onClick={toggleOverlay}
