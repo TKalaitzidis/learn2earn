@@ -3,36 +3,36 @@ import { FaUser } from "react-icons/fa";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { useState } from "react";
 
+function Login({ setIsAuth, isAuth }) {
+  const [data, setData] = useState({
+    username: "",
+    password: "",
+  });
 
-function Login({setIsAuth, isAuth}) {
+  const loginUser = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-    const [data, setData] = useState({
-        username: '',
-        password: ''
-      })
-      
-    const loginUser = async (e) => {
-        e.preventDefault()
-        try {
-          const response = await fetch("http://localhost:8000/auth/login",{
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(data)
-          })
+      const parseRes = await response.json();
 
-          const parseRes = await response.json()
+      console.log(parseRes)
 
-          localStorage.setItem("token", parseRes.token);
+      localStorage.setItem("token", parseRes.token);
 
-          setIsAuth(true);
-        } catch (error) {
-          console.error(error.message)
-        }
+      setIsAuth(true);
+    } catch (error) {
+      console.error(error.message);
     }
+  };
 
   return (
     <>
-      <Navbar isAuth={isAuth}/>
+      <Navbar isAuth={isAuth} />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="p-8 bg-white shadow-md rounded-lg">
           <form className="space-y-4" onSubmit={loginUser}>
@@ -43,7 +43,7 @@ function Login({setIsAuth, isAuth}) {
                 type="text"
                 placeholder="Username"
                 value={data.username}
-                onChange={(e) => setData({...data, username: e.target.value})}
+                onChange={(e) => setData({ ...data, username: e.target.value })}
                 required
                 className="flex-1 ml-2 outline-none"
               />
@@ -54,13 +54,12 @@ function Login({setIsAuth, isAuth}) {
                 type="password"
                 placeholder="Password"
                 value={data.password}
-                onChange={(e) => setData({...data, password: e.target.value})}
+                onChange={(e) => setData({ ...data, password: e.target.value })}
                 required
                 className="flex-1 ml-2 outline-none"
               />
             </div>
             <div className="remember-forgot flex justify-between items-center text-sm">
-              
               <a
                 href="/forgpass"
                 className="text-black font-bold hover:text-gray-700"

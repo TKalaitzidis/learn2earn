@@ -1,5 +1,10 @@
 const router = require("express").Router();
 const pool = require("../config/db");
+require("dotenv").config();
+const mailjet = require("node-mailjet").apiConnect(
+  process.env.MAILJET_API_KEY,
+  process.env.MAILJET_SECRET_KEY
+);
 
 router.get("/itemlist", async (req, res) => {
   try {
@@ -16,8 +21,8 @@ router.get("/itemlist", async (req, res) => {
 router.get("/whoowns", async (req, res) => {
   try {
     const users = await pool.query(
-      "SELECT userbase.user_name, userbase.user_email, userbase.user_area, userbase.user_points, userbase.user_id FROM booksentry JOIN userbase ON booksentry.u_id "+
-      "= userbase.user_id JOIN books ON booksentry.b_id = books.book_id WHERE books.book_name = $1;",
+      "SELECT userbase.user_name, userbase.user_email, userbase.user_area, userbase.user_points, userbase.user_id FROM booksentry JOIN userbase ON booksentry.u_id " +
+        "= userbase.user_id JOIN books ON booksentry.b_id = books.book_id WHERE books.book_name = $1;",
       [req.query.book_name]
     );
 
@@ -30,10 +35,11 @@ router.get("/whoowns", async (req, res) => {
 router.get("/userbooks", async (req, res) => {
   try {
     const ubooks = await pool.query(
-      "SELECT books.book_name, books.book_author, books.book_genre, books.book_points, "+
-      "books.book_type FROM booksentry JOIN userbase ON booksentry.u_id = userbase.user_id "+
-      "JOIN books ON booksentry.b_id = books.book_id WHERE userbase.user_name=$1;",
-    [req.query.username]);
+      "SELECT books.book_name, books.book_author, books.book_genre, books.book_points, " +
+        "books.book_type FROM booksentry JOIN userbase ON booksentry.u_id = userbase.user_id " +
+        "JOIN books ON booksentry.b_id = books.book_id WHERE userbase.user_name=$1;",
+      [req.query.username]
+    );
     res.send(ubooks.rows);
   } catch (error) {
     res.status(500).json("Server error");
@@ -44,7 +50,10 @@ router.post("/submit", async (req, res) => {
   try {
     const { book_name, book_author, book_genre, book_type, user_id } = req.body;
 
-    const submitcheck = await pool.query("SELECT * FROM books WHERE book_name=$1", [book_name]);
+    const submitcheck = await pool.query(
+      "SELECT * FROM books WHERE book_name=$1",
+      [book_name]
+    );
     const cond = submitcheck.rows[0];
 
     if (cond) {
@@ -59,8 +68,14 @@ router.post("/submit", async (req, res) => {
       if (userOwns.rows.length > 0) {
         res.send("User already owns the book");
       } else {
-        await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [cond.book_id.toString(), user_id]);
-        await pool.query("UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;", [user_id]);
+        await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [
+          cond.book_id.toString(),
+          user_id,
+        ]);
+        await pool.query(
+          "UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;",
+          [user_id]
+        );
         res.send("Submitted successfully");
       }
     } else {
@@ -69,8 +84,14 @@ router.post("/submit", async (req, res) => {
         [book_name, book_author, book_genre, book_type]
       );
 
-      await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [booksubmit.rows[0].book_id.toString(), user_id]);
-      await pool.query("UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;", [user_id]);
+      await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [
+        booksubmit.rows[0].book_id.toString(),
+        user_id,
+      ]);
+      await pool.query(
+        "UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;",
+        [user_id]
+      );
       res.send("New book submitted successfully");
     }
   } catch (error) {
@@ -81,26 +102,100 @@ router.post("/submit", async (req, res) => {
 
 router.post("/transact", async (req, res) => {
   try {
-    const { book_name, owner_name, buyer_name, buyer_id, owner_id } = req.body;
+    const {
+      book_name,
+      owner_name,
+      buyer_name,
+      owner_id,
+      owner_email,
+      form_firstname,
+      form_lastname,
+      form_streetname,
+      form_number,
+      form_floor,
+      form_city,
+      form_postal,
+      form_country,
+      form_state,
+    } = req.body;
 
-    const bookres = await pool.query("SELECT * FROM books WHERE book_name = $1;", [book_name]);
+    const bookres = await pool.query(
+      "SELECT * FROM books WHERE book_name = $1;",
+      [book_name]
+    );
     const book = bookres.rows[0];
-    const pointsCheck = await pool.query("SELECT * FROM userbase WHERE user_points>$1 AND user_name=$2;", [book.book_points, buyer_name]);
+    const pointsCheck = await pool.query(
+      "SELECT * FROM userbase WHERE user_points>$1 AND user_name=$2;",
+      [book.book_points, buyer_name]
+    );
 
-    if (pointsCheck.rows.length > 0){
-      await pool.query("UPDATE userbase SET user_points = user_points + $1 WHERE user_name = $2;", [book.book_points, owner_name]);
-      await pool.query("UPDATE userbase SET user_points = user_points - $1 WHERE user_name = $2;", [book.book_points, buyer_name]);
-      await pool.query("DELETE FROM booksentry WHERE b_id = $1 AND u_id = $2;", [book.book_id, owner_id]);
-      res.send("Transaction successful.");
-    }
-    else{
+    if (pointsCheck.rows.length > 0) {
+      await pool.query(
+        "UPDATE userbase SET user_points = user_points + $1 WHERE user_name = $2;",
+        [book.book_points, owner_name]
+      );
+      await pool.query(
+        "UPDATE userbase SET user_points = user_points - $1 WHERE user_name = $2;",
+        [book.book_points, buyer_name]
+      );
+      await pool.query(
+        "DELETE FROM booksentry WHERE b_id = $1 AND u_id = $2;",
+        [book.book_id, owner_id]
+      );
+      const request = mailjet.post("send", { version: "v3.1" }).request({
+        Messages: [
+          {
+            From: {
+              Email: "learn2earnproj@gmail.com",
+              Name: "Learn2Earn",
+            },
+            To: [
+              {
+                Email: owner_email,
+                Name: owner_name,
+              },
+            ],
+            Subject: `Book Transaction successful: ${book_name}`,
+            HTMLPart: `
+                  <h3>Book Transaction successful: ${book_name}</h3>
+                  <p>Your book "${book_name}" has successfully been picked by user: ${buyer_name}. You should now send it to the following address:</p>
+                  <div style="border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+                    <p><strong>Recipient:</strong> ${form_firstname} ${form_lastname}</p>
+                    <p><strong>Address:</strong> ${form_streetname} ${form_number}</p>
+                    <p><strong>Floor:</strong> ${form_floor}</p>
+                    <p><strong>City:</strong> ${form_city}</p>
+                    <p><strong>Postal Code:</strong> ${form_postal}</p>
+                    <p><strong>State:</strong> ${form_state}</p>
+                    <p><strong>Country:</strong> ${form_country}</p>
+                  </div>
+                  <p>If you fail to send the book to the address in more than 14 days, your account will be penalized.</p>
+                `,
+          },
+        ],
+      });
+
+      request
+        .then((result) => {
+          res
+            .status(200)
+            .send(
+              "Transaction successful. Email sent: " +
+                result.body.Messages[0].Status
+            );
+        })
+        .catch((err) => {
+          console.error("Error sending email:", err);
+          res
+            .status(500)
+            .send("Transaction successful, but email sending failed.");
+        });
+    } else {
       res.send("User doesnt have enough points to buy this book");
     }
   } catch (error) {
     console.error("Error during transaction:", error);
-    res.status(500).json({ error:"Server error", details: error.message });
+    res.status(500).json({ error: "Server error", details: error.message });
   }
-})
-
+});
 
 module.exports = router;
