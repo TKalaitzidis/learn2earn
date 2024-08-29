@@ -1,8 +1,9 @@
 import Navbar from "../components/Navbar";
 import { FaUser } from "react-icons/fa";
 import { RiLockPasswordFill } from "react-icons/ri";
-import { MdEmail } from "react-icons/md";
+import { MdEmail, MdTry } from "react-icons/md";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 function Register({setIsAuth, isAuth}) {
   const cities = [
@@ -35,16 +36,20 @@ function Register({setIsAuth, isAuth}) {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data)
       })
-
+      
       const parseRes = await response.json()
       
-      console.log(parseRes)
-
-      localStorage.setItem("token", parseRes.token);
       if(parseRes.token){
+        localStorage.setItem("token", parseRes.token);
+        toast.success("User successfully registered!");
         setIsAuth(true)
       }
-      else{
+      else if (parseRes.userExists){
+        toast.error("User already exists.");
+        setIsAuth(false)
+      }
+      else if (parseRes.invalidEmail){
+        toast.error("Invalid Email.");
         setIsAuth(false)
       }
       

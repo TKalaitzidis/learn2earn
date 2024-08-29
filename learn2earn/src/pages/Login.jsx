@@ -2,6 +2,7 @@ import Navbar from "../components/Navbar";
 import { FaUser } from "react-icons/fa";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 function Login({ setIsAuth, isAuth }) {
   const [data, setData] = useState({
@@ -20,11 +21,14 @@ function Login({ setIsAuth, isAuth }) {
 
       const parseRes = await response.json();
 
-      console.log(parseRes)
-
-      localStorage.setItem("token", parseRes.token);
-
-      setIsAuth(true);
+      if (parseRes.token) {
+        localStorage.setItem("token", parseRes.token);
+        setIsAuth(true);
+        toast.success("User logged in successfully.");
+      }
+      else{
+        toast.error(parseRes);
+      }
     } catch (error) {
       console.error(error.message);
     }

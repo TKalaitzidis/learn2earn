@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar.jsx";
+import { toast } from "react-toastify";
 
 function Settings({ setIsAuth, isAuth, name }) {
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,8 +18,8 @@ function Settings({ setIsAuth, isAuth, name }) {
   const [newMail, setNewMail] = useState("");
 
   const showConfirmation = (action) => {
-    setConfirmOverlay(true);
     setAction(action);
+    setConfirmOverlay(true);
   };
 
   async function deleteUser() {
@@ -38,7 +39,7 @@ function Settings({ setIsAuth, isAuth, name }) {
       const parseRes = await response.text();
 
       console.log(parseRes);
-
+      setConfirmPassword('');
       localStorage.removeItem("token");
       setIsAuth(false);
     } catch (error) {
@@ -62,10 +63,10 @@ function Settings({ setIsAuth, isAuth, name }) {
   
         const parseRes = await response.text();
   
-        console.log(parseRes);
-
+        toast.success(parseRes);
+        setConfirmPassword('');
       } catch (error) {
-        console.error(error.message);
+        toast.error(error.message);
       }
   }
 
@@ -86,7 +87,7 @@ function Settings({ setIsAuth, isAuth, name }) {
         const parseRes = await response.text();
   
         console.log(parseRes);
-
+        setConfirmPassword('');
       } catch (error) {
         console.error(error.message);
       }
@@ -109,13 +110,12 @@ function Settings({ setIsAuth, isAuth, name }) {
   
         const parseRes = await response.text();
   
-        console.log(parseRes);
-
+        toast.success(parseRes);
+        setConfirmPassword('');
       } catch (error) {
-        console.error(error.message);
+        toast.error(error.message);
       }
   }
-
 
   const handleConfirmPassword = async (event) => {
     event.preventDefault();
@@ -145,7 +145,7 @@ function Settings({ setIsAuth, isAuth, name }) {
             changePass();
         }
       } else {
-        console.log(false);
+        toast.error("Password is wrong.");
       }
     } catch (error) {
       console.error(error.message);

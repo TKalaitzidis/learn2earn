@@ -49,18 +49,24 @@ router.get("/otheruser", authorization, async (req, res) => {
 
 router.get("/exists", async (req, res) => {
   try {
-    doesExist = await pool.query(
+    const doesExist = await pool.query(
       "SELECT user_id FROM userbase WHERE user_email=$1",
       [req.query.user_email]
     );
+
+
+    console.log(doesExist.rows.length)
     if (doesExist.rows.length > 0) {
       const randomString = generateRandomString(8);
       const saltRound = 10;
       const Salt = await bcrypt.genSalt(saltRound);
       const bcryptPassword = await bcrypt.hash(randomString, Salt);
+
       await pool.query(
-        `UPDATE userbase SET user_pass = '${bcryptPassword}' WHERE user_email = '${req.query.user_email}';`
+        `UPDATE userbase SET user_pass = $1 WHERE user_email = $2`,
+        [bcryptPassword, req.query.user_email]
       );
+
       const request = mailjet.post("send", { version: "v3.1" }).request({
         Messages: [
           {
@@ -75,24 +81,19 @@ router.get("/exists", async (req, res) => {
               },
             ],
             Subject: "Password Reset",
-            TextPart: `Here is your new password: ${randomString}, if you don't remember reseting your password please contact us immediately.`,
+            TextPart: `Here is your new password: ${randomString}, if you don't remember resetting your password please contact us immediately.`,
           },
         ],
       });
 
       request
         .then((result) => {
-          res
-            .status(200)
-            .send(
-              "Reset successful. Email sent: " + result.body.Messages[0].Status
-            );
+          res.status(200).send("Reset successful. Email sent: " + result.body.Messages[0].Status);
         })
         .catch((err) => {
           console.error("Error sending email:", err);
           res.status(500).send("Email sending failed.");
         });
-      res.send(bcryptPassword);
     } else {
       res.send(false);
     }
@@ -167,7 +168,7 @@ router.post("/changename", async (req, res) => {
         `UPDATE userbase SET user_name = '${new_name}' WHERE user_name = '${user_name}';`
       );
 
-      res.send("Changed Name successfully.");
+      res.send("Changed username successfully.");
     }
   } catch (error) {
     console.error("Error changing name:", error);

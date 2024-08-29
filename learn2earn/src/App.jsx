@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Main from "./pages/Main.jsx";
 import Login from "./pages/Login.jsx";
 import Contact from "./pages/Contact.jsx";
@@ -12,39 +14,37 @@ import UserChoice from "./pages/UserChoice.jsx";
 import Profile from "./pages/Profile.jsx";
 
 function App() {
-
   const categories = [
-    "All", 
-    "Sci-Fi", 
-    "Fantasy", 
-    "Adventure", 
-    "Fiction", 
-    "Dystopian", 
-    "Mystery", 
-    "Thriller", 
-    "Horror", 
-    "Romance", 
-    "Historical Fiction", 
-    "Biography", 
-    "Self-Help", 
-    "Non-Fiction", 
-    "Young Adult", 
-    "Children's", 
-    "Graphic Novel", 
-    "Poetry", 
-    "Crime", 
-    "Memoir", 
-    "Philosophy", 
-    "Science", 
-    "Technology", 
-    "Travel", 
-    "Classics", 
-    "Humor"
+    "All",
+    "Sci-Fi",
+    "Fantasy",
+    "Adventure",
+    "Fiction",
+    "Dystopian",
+    "Mystery",
+    "Thriller",
+    "Horror",
+    "Romance",
+    "Historical Fiction",
+    "Biography",
+    "Self-Help",
+    "Non-Fiction",
+    "Young Adult",
+    "Children's",
+    "Graphic Novel",
+    "Poetry",
+    "Crime",
+    "Memoir",
+    "Philosophy",
+    "Science",
+    "Technology",
+    "Travel",
+    "Classics",
+    "Humor",
   ];
-  
+
   const [isAuth, setIsAuth] = useState(false);
   const [user, setUser] = useState([]);
-  
 
   async function checkIsAuth() {
     try {
@@ -71,19 +71,17 @@ function App() {
       const parseRes = await response.json();
 
       setUser({
-        name : parseRes.user_name,
-        email : parseRes.user_email,
-        id : parseRes.user_id,
-        area : parseRes.user_area,
-        upoints : parseRes.user_points
+        name: parseRes.user_name,
+        email: parseRes.user_email,
+        id: parseRes.user_id,
+        area: parseRes.user_area,
+        upoints: parseRes.user_points,
       });
-      
     } catch (error) {
       console.error(error.message);
     }
   }
 
-  
   useEffect(() => {
     getName();
   });
@@ -94,9 +92,26 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <Routes>
         <Route path="/" element={<Navigate replace to="/home" />} />
-        <Route path="/home" element={<Main isAuth={isAuth} name={user.name} categories={categories}/>} />
+        <Route
+          path="/home"
+          element={
+            <Main isAuth={isAuth} name={user.name} categories={categories} />
+          }
+        />
         <Route
           path="/login"
           element={
@@ -127,23 +142,57 @@ function App() {
             )
           }
         />
-        
-        <Route path="/contact" element={<Contact isAuth={isAuth} name={user.name}/>} />
-        <Route path="/about" element={<About isAuth={isAuth} name={user.name}/>} />
+
+        <Route
+          path="/contact"
+          element={<Contact isAuth={isAuth} name={user.name} />}
+        />
+        <Route
+          path="/about"
+          element={<About isAuth={isAuth} name={user.name} />}
+        />
         <Route path="/forgpass" element={<ForgPass />} />
 
         <Route
           path="/settings"
           element={
             isAuth ? (
-              <Settings setIsAuth={setIsAuth} isAuth={isAuth} name={user.name} />
+              <Settings
+                setIsAuth={setIsAuth}
+                isAuth={isAuth}
+                name={user.name}
+              />
             ) : (
               <Navigate to="/home" />
             )
           }
         />
-        <Route path="/userchoice" element={<UserChoice isAuth={isAuth} name={user.name} area={user.area} email={user.email} u_id={user.id}/>} />
-        <Route path="/profile" element={<Profile isAuth={isAuth} name={user.name} area={user.area} email={user.email} upoints={user.upoints} categories={categories} u_id={user.id} />} />
+        <Route
+          path="/userchoice"
+          element={
+            <UserChoice
+              isAuth={isAuth}
+              name={user.name}
+              area={user.area}
+              email={user.email}
+              u_id={user.id}
+            />
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <Profile
+              isAuth={isAuth}
+              name={user.name}
+              area={user.area}
+              email={user.email}
+              upoints={user.upoints}
+              categories={categories}
+              u_id={user.id}
+            />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

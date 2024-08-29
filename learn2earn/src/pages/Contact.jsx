@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import {useNavigate} from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { toast } from "react-toastify";
+
 
 function Contact({ isAuth, name }) {
   const navigate = useNavigate();
@@ -25,10 +27,10 @@ function Contact({ isAuth, name }) {
       );
 
       if (response.ok) {
-        console.log(response);
+        toast.success("Report submitted successfully.");
         navigate(`/home`);
       } else {
-        console.error("Failed to submit the report.");
+        toast.error("Failed to submit the report.");
       }
       navigate(`/home`);
     } catch (error) {

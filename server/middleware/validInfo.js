@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
       if (![email, username, password].every(Boolean)) {
         return res.status(401).json("Missing Credentials");
       } else if (!validEmail(email)) {
-        return res.status(401).json("Invalid Email");
+        return res.status(401).json({invalidEmail: "Invalid Email"});
       }
     } else if (req.path === "/login") {
       if (![username, password].every(Boolean)) {
@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
     }
     if (req.path === "/changemail") {
       if(!validEmail(new_mail)){
-        return res.status(401).json("Invalid Email");
+        return res.status(401).json({invalidEmail: "Invalid Email"});
       }
     }
     next();

@@ -56,7 +56,8 @@ router.post("/submit", async (req, res) => {
     );
     const cond = submitcheck.rows[0];
 
-    if (cond) {
+    if (submitcheck.rows.length > 0) {
+      
       const userOwns = await pool.query(
         `SELECT entry_id FROM booksentry 
          JOIN userbase ON booksentry.u_id = userbase.user_id 
@@ -67,6 +68,7 @@ router.post("/submit", async (req, res) => {
 
       if (userOwns.rows.length > 0) {
         res.send("User already owns the book");
+        return;
       } else {
         await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [
           cond.book_id.toString(),
@@ -92,7 +94,7 @@ router.post("/submit", async (req, res) => {
         "UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;",
         [user_id]
       );
-      res.send("New book submitted successfully");
+      res.send("New book submitted successfully.");
     }
   } catch (error) {
     console.error("Error during book submission:", error);

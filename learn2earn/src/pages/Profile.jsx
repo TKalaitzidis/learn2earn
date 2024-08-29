@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import ItemList from "../components/ItemList";
 import Sidebar from "../components/Sidebar.jsx";
 import { Link } from "react-router-dom";
-
+import { toast } from "react-toastify";
 
 function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
   const location = useLocation();
   const queryParams = location.state;
-  
+
   const [items, setItems] = useState([]);
   const [isOverlay, setIsOverlay] = useState(false);
-  const [allBooks, setAllBooks] = useState([]); 
+  const [allBooks, setAllBooks] = useState([]);
   const [input, setInput] = useState({
-    book_name: '',
-    book_author: '',
-    book_genre: 'Sci-fi',
-    book_type: 'Physical',
+    book_name: "",
+    book_author: "",
+    book_genre: "Sci-fi",
+    book_type: "Physical",
     user_id: u_id,
   });
-
 
   const [user, setUser] = useState({
     name: queryParams?.user_name || name,
@@ -29,7 +28,7 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
     points: queryParams?.user_points || upoints,
   });
 
-  const inpCategories = categories.filter(item => item !=="All");  
+  const inpCategories = categories.filter((item) => item !== "All");
 
   const toggleOverlay = () => {
     setIsOverlay(!isOverlay);
@@ -42,8 +41,8 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
   };
 
   const [currentCategory, setCurrentCategory] = useState("All");
-  const [currentType, setCurrentType] = useState("All Types"); 
-  
+  const [currentType, setCurrentType] = useState("All Types");
+
   const handleCategoryChange = (selectedCategory) => {
     setCurrentCategory(selectedCategory);
     if (selectedCategory === "All") {
@@ -55,8 +54,6 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
       setItems(filteredBooks);
     }
   };
-
-  
 
   const handleTypeChange = (selectedType) => {
     setCurrentType(selectedType);
@@ -94,36 +91,39 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
 
       setItems(userBooks);
       setAllBooks(userBooks);
-      if(!isDiffUser){
-        setInput({...input, user_id: u_id});
+      if (!isDiffUser) {
+        setInput({ ...input, user_id: u_id });
       }
     } catch (error) {
       console.error(error.message);
     }
   }
 
-  const submit = async (e) =>{
-    e.preventDefault()
+  const submit = async (e) => {
+    e.preventDefault();
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/books/submit`,
-        {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(input)
-        }
-      );
+      const response = await fetch(`http://localhost:8000/books/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
 
-      await response.text();
-      
+      const parseRes = await response.text();
+
+      if (parseRes == "New book submitted successfully.") {
+        toast.success(parseRes);
+      } else {
+        toast.error(parseRes);
+      }
       userbooks();
+
       setIsOverlay(false);
     } catch (error) {
-      console.error(error.message);
+      toast.error(error.message);
     }
-  }
-  
+  };
+
   useEffect(() => {
     userbooks();
     setUser({
@@ -132,8 +132,8 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
       area: queryParams?.user_area || area,
       points: queryParams?.user_points || upoints,
     });
-  });
-  
+  }, []);
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar isAuth={isAuth} name={name} />
@@ -157,9 +157,7 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
                 <p className="text-gray-600">Points: {user.points}</p>
               </div>
               <div className="flex flex-col">
-                <p className="text-gray-600">
-                  Books Offering: {items.length}
-                </p>
+                <p className="text-gray-600">Books Offering: {items.length}</p>
                 <p className="text-gray-600">E-mail: {user.email}</p>
               </div>
             </div>
@@ -167,120 +165,140 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
         </div>
       </div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        {!queryParams && (<div><div className="flex justify-center space-x-4 mb-8">
-            <button
-              className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
-              onClick={toggleOverlay}
-            >
-              Add New Book
-            </button>
-
-            <Link to="/settings">
-              <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">
-                User Settings
+        {!queryParams && (
+          <div>
+            <div className="flex justify-center space-x-4 mb-8">
+              <button
+                className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
+                onClick={toggleOverlay}
+              >
+                Add New Book
               </button>
-            </Link>
-          </div>
-          {isOverlay && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-              onClick={handleOverlayClick}
-            >
-              <div className="bg-white rounded-lg shadow-md overflow-hidden w-96 relative">
-                <button
-                  className="absolute top-2 right-2 text-black text-xl"
-                  onClick={() => setIsOverlay(false)}
-                >
-                  &times;
+
+              <Link to="/settings">
+                <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">
+                  User Settings
                 </button>
-                <form
-                onSubmit={submit}
-                className="p-6">
-                  
-                  <h2 className="text-lg font-semibold mb-4">Book Submission</h2>
-                  <div className="mb-4">
-                    <label
-                      htmlFor="title"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      value={input.book_name}
-                      onChange={(e) => setInput({...input, book_name: e.target.value})}
-                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label
-                      htmlFor="author"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Author
-                    </label>
-                    <input
-                      type="text"
-                      id="author"
-                      name="author"
-                      value={input.book_author}
-                      onChange={(e) => setInput({...input, book_author: e.target.value})}
-                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    />
-                  </div>
-                  <label
-                    htmlFor="genre"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Genre
-                  </label>
-                  <div className="mb-4 flex flex-col border border-gray-300 p-2 rounded">
-                    <select 
-                    value={input.book_genre}
-                    onChange={(e) => setInput({...input, book_genre: e.target.value})}
-                    required className="outline-none">
-                      {inpCategories.map((genre) => (
-                        <option key={genre} value={genre}>
-                          {genre}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <label
-                    htmlFor="type"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Type
-                  </label>
-                  <div className="mb-4 flex flex-col border border-gray-300 p-2 rounded">
-                    <select 
-                    value={input.book_type}
-                    onChange={(e) => setInput({...input, book_type: e.target.value})}
-                    required className="outline-none">
-                    <option key="Physical" value="Physical">
-                      Physical
-                    </option>
-                      <option key="PDF" value="PDF">
-                        PDF
-                      </option>                  
-                    </select>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="submit"
-                      className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                </form>
-              </div>
+              </Link>
             </div>
-          )}</div>)}  
-          
-        <ItemList username={user.name} willOverlay={queryParams ? true : false} items={items} logged_name={name} />
+            {isOverlay && (
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                onClick={handleOverlayClick}
+              >
+                <div className="bg-white rounded-lg shadow-md overflow-hidden w-96 relative">
+                  <button
+                    className="absolute top-2 right-2 text-black text-xl"
+                    onClick={() => setIsOverlay(false)}
+                  >
+                    &times;
+                  </button>
+                  <form onSubmit={submit} className="p-6">
+                    <h2 className="text-lg font-semibold mb-4">
+                      Book Submission
+                    </h2>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="title"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={input.book_name}
+                        onChange={(e) =>
+                          setInput({ ...input, book_name: e.target.value })
+                        }
+                        className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="author"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Author
+                      </label>
+                      <input
+                        type="text"
+                        id="author"
+                        name="author"
+                        value={input.book_author}
+                        onChange={(e) =>
+                          setInput({ ...input, book_author: e.target.value })
+                        }
+                        className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                      />
+                    </div>
+                    <label
+                      htmlFor="genre"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Genre
+                    </label>
+                    <div className="mb-4 flex flex-col border border-gray-300 p-2 rounded">
+                      <select
+                        value={input.book_genre}
+                        onChange={(e) =>
+                          setInput({ ...input, book_genre: e.target.value })
+                        }
+                        required
+                        className="outline-none"
+                      >
+                        {inpCategories.map((genre) => (
+                          <option key={genre} value={genre}>
+                            {genre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <label
+                      htmlFor="type"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Type
+                    </label>
+                    <div className="mb-4 flex flex-col border border-gray-300 p-2 rounded">
+                      <select
+                        value={input.book_type}
+                        onChange={(e) =>
+                          setInput({ ...input, book_type: e.target.value })
+                        }
+                        required
+                        className="outline-none"
+                      >
+                        <option key="Physical" value="Physical">
+                          Physical
+                        </option>
+                        <option key="PDF" value="PDF">
+                          PDF
+                        </option>
+                      </select>
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <ItemList
+          username={user.name}
+          willOverlay={queryParams ? true : false}
+          items={items}
+          logged_name={name}
+        />
         <Sidebar
           categories={categories}
           onCategoryChange={handleCategoryChange}

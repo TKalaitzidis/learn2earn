@@ -20,7 +20,7 @@ router.post("/register", validInfo, async (req, res) => {
     );
     
     if (user.rows.length !== 0) {
-      return res.status(401).send("User already exists!");
+      return res.status(401).json({userExists: "User already exists!"});
     }
     
     
@@ -59,7 +59,8 @@ router.post("/login",validInfo, async (req, res) => {
         const validPassword = await bcrypt.compare(password, user.rows[0].user_pass);
         
         if(!validPassword){
-          res.status(401).json("Password or User Name is incorrect");
+          res.json("Password or User Name is incorrect");
+          return;
         }
         const token = jwtGenerator(user.rows[0].user_id);
         res.json({ token })

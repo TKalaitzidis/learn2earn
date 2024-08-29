@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import { MdEmail } from "react-icons/md";
+import { toast } from "react-toastify";
 
 function ForgPass() {
   const [input, setInput] = useState("");
@@ -16,9 +17,16 @@ function ForgPass() {
 
         const parseRes = await response.text()
         
-        console.log(parseRes);
+        
+        if(parseRes != 'false'){
+          toast.success("Password reset e-mail sent successfully.");
+
+        }
+        else{
+          toast.error("User doesn't exist.");
+        }
       } catch (error) {
-        console.error(error.message)
+        toast.error(error.message)
       }
   };
 
