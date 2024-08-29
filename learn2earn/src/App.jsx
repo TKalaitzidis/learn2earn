@@ -45,6 +45,7 @@ function App() {
 
   const [isAuth, setIsAuth] = useState(false);
   const [user, setUser] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   async function checkIsAuth() {
     try {
@@ -116,7 +117,11 @@ function App() {
           path="/login"
           element={
             !isAuth ? (
-              <Login setIsAuth={setIsAuth} isAuth={isAuth} />
+              <Login
+                setIsAuth={setIsAuth}
+                isAuth={isAuth}
+                setIsAdmin={setIsAdmin}
+              />
             ) : (
               <Navigate to="/profile" />
             )
@@ -129,16 +134,6 @@ function App() {
               <Register setIsAuth={setIsAuth} isAuth={isAuth} />
             ) : (
               <Navigate to="/profile" />
-            )
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            isAuth ? (
-              <Dashboard name={user.name} isAuth={isAuth} />
-            ) : (
-              <Navigate to="/login" />
             )
           }
         />
@@ -182,15 +177,19 @@ function App() {
         <Route
           path="/profile"
           element={
-            <Profile
-              isAuth={isAuth}
-              name={user.name}
-              area={user.area}
-              email={user.email}
-              upoints={user.upoints}
-              categories={categories}
-              u_id={user.id}
-            />
+            !isAdmin ? (
+              <Profile
+                isAuth={isAuth}
+                name={user.name}
+                area={user.area}
+                email={user.email}
+                upoints={user.upoints}
+                categories={categories}
+                u_id={user.id}
+              />
+            ) : (
+              <Dashboard name={user.name} isAuth={isAuth} />
+            )
           }
         />
       </Routes>

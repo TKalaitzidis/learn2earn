@@ -1,13 +1,16 @@
 CREATE DATABASE learn2earn;
 
-CREATE TABLE userbase(
-    user_id  SERIAL PRIMARY KEY,
-    user_name VARCHAR(255) NOT NULL,
-    user_email VARCHAR(255) NOT NULL,
-    user_pass VARCHAR(255) NOT NULL,
-    user_area VARCHAR(255) NOT NULL,
-    user_points INT DEFAULT 3
-);
+CREATE TABLE userbase (  
+    user_id SERIAL PRIMARY KEY,  
+    user_name VARCHAR(255) NOT NULL,  
+    user_email VARCHAR(255) NOT NULL UNIQUE,  
+    user_pass VARCHAR(255) NOT NULL,  
+    user_area VARCHAR(255) NOT NULL,  
+    user_points INT DEFAULT 3 CHECK (user_points >= 0),  
+    isAdmin BOOLEAN DEFAULT FALSE,  
+    isBanned BOOLEAN DEFAULT FALSE,  
+    banDays INT DEFAULT 0 CHECK (banDays >= 0)  
+);  
 
 CREATE TABLE booksentry(
     entry_id SERIAL PRIMARY KEY,
@@ -18,6 +21,14 @@ CREATE TABLE booksentry(
     FOREIGN KEY (u_id)
         REFERENCES userbase (user_id)
 );
+
+ALTER TABLE booksentry
+DROP CONSTRAINT booksentry_u_id_fkey;
+
+ALTER TABLE booksentry
+ADD CONSTRAINT booksentry_u_id_fkey
+FOREIGN KEY (u_id) REFERENCES userbase(user_id)
+ON DELETE CASCADE;
 
 CREATE TABLE books (
     book_id SERIAL PRIMARY KEY,

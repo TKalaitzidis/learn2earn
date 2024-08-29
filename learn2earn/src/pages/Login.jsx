@@ -4,7 +4,7 @@ import { RiLockPasswordFill } from "react-icons/ri";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-function Login({ setIsAuth, isAuth }) {
+function Login({ setIsAuth, isAuth, setIsAdmin }) {
   const [data, setData] = useState({
     username: "",
     password: "",
@@ -24,6 +24,7 @@ function Login({ setIsAuth, isAuth }) {
       if (parseRes.token) {
         localStorage.setItem("token", parseRes.token);
         setIsAuth(true);
+        setIsAdmin(parseRes.isAdmin);
         toast.success("User logged in successfully.");
       }
       else{

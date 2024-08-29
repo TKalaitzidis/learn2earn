@@ -113,11 +113,19 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
 
       if (parseRes == "New book submitted successfully.") {
         toast.success(parseRes);
+        setInput({
+          book_name: "",
+          book_author: "",
+          book_genre: "Sci-fi",
+          book_type: "Physical",
+          user_id: u_id,
+        });
       } else {
         toast.error(parseRes);
       }
+      
       userbooks();
-
+      
       setIsOverlay(false);
     } catch (error) {
       toast.error(error.message);
@@ -132,8 +140,9 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
       area: queryParams?.user_area || area,
       points: queryParams?.user_points || upoints,
     });
-  }, []);
+  }, [location]);
 
+  
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar isAuth={isAuth} name={name} />
@@ -165,7 +174,7 @@ function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
         </div>
       </div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        {!queryParams && (
+        {user.name == name && (
           <div>
             <div className="flex justify-center space-x-4 mb-8">
               <button

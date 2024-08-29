@@ -54,8 +54,6 @@ router.get("/exists", async (req, res) => {
       [req.query.user_email]
     );
 
-
-    console.log(doesExist.rows.length)
     if (doesExist.rows.length > 0) {
       const randomString = generateRandomString(8);
       const saltRound = 10;
@@ -145,12 +143,11 @@ router.post("/contactsubmit", async (req, res) => {
 router.delete("/deleteuser", async (req, res) => {
   try {
     const { user_name } = req.body;
-    console.log(user_name);
     await pool.query(`DELETE FROM userbase WHERE user_name = '${user_name}'`);
 
     res.send("Deleted successfully.");
   } catch (error) {
-    console.error("Error deleting user:", error);
+    res.send(`Error deleting user: ${error}`);
   }
 });
 
@@ -183,16 +180,16 @@ router.post("/changemail", validInfo, async (req, res) => {
       `SELECT * FROM userbase WHERE user_email = '${new_mail}';`
     );
     if (checkExists.rows.length > 0) {
-      res.send("Email already exists.");
+      res.json({alreadyExists: "Email already exists."});
     } else {
       await pool.query(
         `UPDATE userbase SET user_email = '${new_mail}' WHERE user_name = '${user_name}';`
       );
 
-      res.send("Changed Email successfully.");
+      res.json({success:"Changed Email successfully."});
     }
   } catch (error) {
-    console.error("Error changing email:", error);
+    res.json({error: `Error changing email: ${error}`});
   }
 });
 
@@ -200,13 +197,18 @@ router.post("/changepass", async (req, res) => {
   try {
     const { newPass, user_name } = req.body;
 
+    const saltRound = 10;
+    const Salt = await bcrypt.genSalt(saltRound);
+    console.log(newPass);
+    const bcryptPassword = await bcrypt.hash(newPass, Salt);
+
     await pool.query(
-      `UPDATE userbase SET user_pass = '${newPass}' WHERE user_name = '${user_name}';`
+      `UPDATE userbase SET user_pass = '${bcryptPassword}' WHERE user_name = '${user_name}';`
     );
 
     res.send("Changed Password successfully.");
   } catch (error) {
-    console.error("Error changing password:", error);
+    res.send(`Error changing password: ${error}`);
   }
 });
 

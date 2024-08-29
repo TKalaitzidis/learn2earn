@@ -43,10 +43,10 @@ function UserChoice({ isAuth, name, area, email, u_id }) {
       });
 
       if (response.ok) {
-        console.log(response);
+        toast.success("Book picked successfully. User has been notified.");
         navigate(`/profile`);
       } else {
-        console.error("Failed to submit the transaction.");
+        toast.error("Failed to submit the transaction.");
       }
       navigate(`/profile`);
     } catch (error) {

@@ -31,90 +31,107 @@ function Settings({ setIsAuth, isAuth, name }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_name: name,
-            
+          }),
+        }
+      );
+
+      const parseRes = await response.text();
+      
+      setConfirmPassword("");
+      if(parseRes=="Deleted successfully."){
+        toast.success(parseRes)
+        localStorage.removeItem("token");
+        setIsAuth(false);
+      }else{
+        toast.error(parseRes)
+      }
+
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
+  async function changeUsername() {
+    try {
+      const response = await fetch(
+        "http://localhost:8000/dashboard/changename",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_name: name,
+            new_name: newName,
           }),
         }
       );
 
       const parseRes = await response.text();
 
-      console.log(parseRes);
-      setConfirmPassword('');
-      localStorage.removeItem("token");
-      setIsAuth(false);
+      toast.success(parseRes);
+      setConfirmPassword("");
     } catch (error) {
-      console.error(error.message);
+      toast.error(error.message);
     }
   }
 
-  async function changeUsername(){
+  async function changeEmail() {
     try {
-        const response = await fetch(
-          "http://localhost:8000/dashboard/changename",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              user_name: name,
-              new_name: newName
-            }),
-          }
-        );
-  
-        const parseRes = await response.text();
-  
-        toast.success(parseRes);
-        setConfirmPassword('');
-      } catch (error) {
-        toast.error(error.message);
+      const response = await fetch(
+        "http://localhost:8000/dashboard/changemail",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_name: name,
+            new_mail: newMail,
+          }),
+        }
+      );
+
+      const parseRes = await response.json();
+      const key = Object.keys(parseRes)[0];
+      const value = parseRes[key];
+
+      if (value == "Changed Email successfully.") {
+        toast.success(value);
+      } else {
+        toast.error(value);
       }
+      setConfirmPassword("");
+      setNewMail("");
+    } catch (error) {
+      toast.error(error.message);
+    }
   }
 
-  async function changeEmail(){
+  async function changePass() {
     try {
-        const response = await fetch(
-          "http://localhost:8000/dashboard/changemail",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              user_name: name,
-              new_mail: newMail
-            }),
-          }
-        );
-  
-        const parseRes = await response.text();
-  
-        console.log(parseRes);
-        setConfirmPassword('');
-      } catch (error) {
-        console.error(error.message);
-      }
-  }
+      const response = await fetch(
+        "http://localhost:8000/dashboard/changepass",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_name: name,
+            newPass: newPass,
+          }),
+        }
+      );
+
+      const parseRes = await response.text();
 
 
-  async function changePass(){
-    try {
-        const response = await fetch(
-          "http://localhost:8000/dashboard/changepass",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              user_name: name,
-              new_pass: newPass
-            }),
-          }
-        );
-  
-        const parseRes = await response.text();
-  
+      if(parseRes == "Changed Password successfully."){
         toast.success(parseRes);
-        setConfirmPassword('');
-      } catch (error) {
-        toast.error(error.message);
+      } else{
+        toast.error(parseRes);
       }
+      setNewPass('');
+      setConfNewPass('');
+      setConfirmPassword('');
+    } catch (error) {
+      toast.error(error.message);
+    }
   }
 
   const handleConfirmPassword = async (event) => {
@@ -134,15 +151,12 @@ function Settings({ setIsAuth, isAuth, name }) {
       if (parseRes.token) {
         if (action == "delete") {
           deleteUser();
-        }
-        else if (action == "username") {
-            changeUsername();
-        }
-        else if (action == "email"){
-            changeEmail();
-        }
-        else if (action == "password"){
-            changePass();
+        } else if (action == "username") {
+          changeUsername();
+        } else if (action == "email") {
+          changeEmail();
+        } else if (action == "password") {
+          changePass();
         }
       } else {
         toast.error("Password is wrong.");
@@ -192,7 +206,6 @@ function Settings({ setIsAuth, isAuth, name }) {
               >
                 Change Password
               </button>
-            
             </form>
             <form
               onSubmit={(e) => {
@@ -206,7 +219,6 @@ function Settings({ setIsAuth, isAuth, name }) {
               >
                 Change Email
               </button>
-            
             </form>
           </div>
 
@@ -317,7 +329,14 @@ function Settings({ setIsAuth, isAuth, name }) {
                   Confirm
                 </button>
                 <button
-                  onClick={() => setConfirmOverlay(false)}
+                  onClick={() => {
+                    setConfirmOverlay(false);
+                    setConfirmPassword("");
+                    setNewMail("");
+                    setNewName("");
+                    setNewPass("");
+                    setConfNewPass("");
+                  }}
                   className="w-full mt-2 px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400"
                 >
                   Cancel
