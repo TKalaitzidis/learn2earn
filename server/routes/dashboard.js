@@ -212,4 +212,13 @@ router.post("/changepass", async (req, res) => {
   }
 });
 
+router.get("/getusers", async (req, res) =>{
+  try {
+    users = await pool.query("SELECT user_id,user_name,user_email,user_area,user_points,isadmin,isbanned,bandays FROM userbase;");
+    res.send(users.rows);
+  } catch (error) {
+    res.send(`Error getting users: ${error}`);
+  }
+});
+
 module.exports = router;

@@ -6,7 +6,7 @@ import Sidebar from "../components/Sidebar.jsx";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-function Profile({ name, isAuth, area, email, upoints, categories, u_id }) {
+function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id }) {
   const location = useLocation();
   const queryParams = location.state;
 

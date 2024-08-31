@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../components/Navbar.jsx";
 import { toast } from "react-toastify";
 
-function Settings({ setIsAuth, isAuth, name }) {
+function Settings({ setIsAuth, isAuth, name, checkIsAuth }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmOverlay, setConfirmOverlay] = useState(false);
   const [action, setAction] = useState("");
@@ -172,6 +172,7 @@ function Settings({ setIsAuth, isAuth, name }) {
     e.preventDefault();
     localStorage.removeItem("token");
     setIsAuth(false);
+    checkIsAuth();
   };
 
   return (

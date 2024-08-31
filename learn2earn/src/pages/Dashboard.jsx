@@ -1,256 +1,377 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar.jsx';
-import Pagination from '../components/Pagination.jsx';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import Navbar from "../components/Navbar.jsx";
+import ItemList from "../components/ItemList.jsx";
+import Sidebar from "../components/Sidebar.jsx";
+import { useNavigate } from "react-router-dom";
+import {
+  PieChart,
+  Pie,
+  Sector,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 
-function Dashboard({isAuth, name}) {
-    const initialRequests = Array.from({ length: 100 }, (_, i) => ({
-        id: i + 1,
-        author: `Author ${i + 1}`,
-        title: `Title ${i + 1}`,
-        user: 'Nick'
-    }));
+const data = [
+  { name: "Physical", value: 400 },
+  { name: "PDF", value: 300 },
+];
+const renderLegend = (props) => {
+  const { payload } = props;
+  return (
+    <ul
+      style={{
+        listStyleType: "none",
+        padding: 0,
+        margin: 0,
+        textAlign: "center",
+      }}
+    >
+      {payload.map((entry, index) => (
+        <li style={{ color: "black", marginBottom: 4 }}>
+          <span style={{ marginRight: 8, color: entry.color }}>■</span>
+          {entry.value}
+        </li>
+      ))}
+    </ul>
+  );
+};
 
-    const initialOffers = Array.from({ length: 50 }, (_, i) => ({
-        id: i + 1,
-        author: `Author ${i + 1}`,
-        title: `Book ${i + 1}`,
-        details: 'Detailed information about Offer'
-    }));
+const COLORS = ["#000000", "#D1D5DB"]; // Black and gray
 
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+  index,
+}) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  const textColor = index === 1 ? "black" : "white";
 
+  return (
+    <text
+      x={x}
+      y={y}
+      fill={textColor}
+      textAnchor={x > cx ? "start" : "end"}
+      dominantBaseline="central"
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
 
-    const [requests, setRequests] = useState(initialRequests);
-    const [offers, setOffers] = useState(initialOffers);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [activeTab, setActiveTab] = useState('offers');  // Default to 'offers'
-    const requestsPerPage = 20;
-    const [currentOffer, setCurrentOffer] = useState(null);
+function Dashboard({ isAuth, name, categories }) {
+  const [books, setBooks] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [allBooks, setAllBooks] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [bookOwners, setBookOwners] = useState([]);
+  const [manage, setManage] = useState("manageUsers");
 
-    const indexOfLastItem = currentPage * requestsPerPage;
-    const indexOfFirstItem = indexOfLastItem - requestsPerPage;
-    const currentRequests = requests.slice(indexOfFirstItem, indexOfLastItem);
-    const currentOffers = offers.slice(indexOfFirstItem, indexOfLastItem);
+  async function getBooks() {
+    try {
+      const response = await fetch("http://localhost:8000/books/itemlist", {
+        method: "GET",
+      });
+      const parseRes = await response.json();
+      const booksList = parseRes.map((book) => ({
+        author: book.book_author,
+        name: book.book_name,
+        genre: book.book_genre,
+        points: book.book_points,
+        type: book.book_type,
+      }));
+      setAllBooks(booksList);
+      setBooks(booksList);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
 
-    const editOffer = (offer) => {
-        setCurrentOffer(offer);
-        setShowOverlay(true);
-    };
+  useEffect(() => {
+    getBooks();
+  }, [manage]);
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const author = event.target.author.value;
-        const title = event.target.title.value;
-        const description = event.target.description.value;
-        
-        if (currentOffer) {
-            // Update existing offer logic
-            const updatedOffers = offers.map(offer => 
-                offer.id === currentOffer.id ? { ...offer, author, title, description } : offer
-            );
-            setOffers(updatedOffers);
-        } else {
-            // Add new offer logic
-            const newOffer = {
-                id: offers.length + 1,
-                author,
-                title,
-                details: description,
-            };
-            setOffers([...offers, newOffer]);
-        }
-        setShowOverlay(false);
-        setCurrentOffer(null); // Reset current offer after submit
-    };
-    
-    const handleRemoveRequest = (id) => {
-        setRequests(requests.filter(request => request.id !== id));
-    };
+  async function getUsers() {
+    try {
+      const response = await fetch("http://localhost:8000/dashboard/getusers", {
+        method: "GET",
+      });
+      const parseRes = await response.json();
+      const userList = parseRes.map((user) => ({
+        user_id: user.user_id,
+        user_name: user.user_name,
+        user_email: user.user_email,
+        user_area: user.user_area,
+        user_points: user.user_points,
+        isadmin: user.isadmin,
+        isbanned: user.isbanned,
+        bandays: user.bandays,
+      }));
+      setAllUsers(userList);
+      setUsers(userList);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
 
-    const [showOverlay, setShowOverlay] = useState(false);
+  let top5Userpoints = [...users]
+    .sort((a, b) => b.user_points - a.user_points)
+    .slice(0, 5);
 
-    const toggleOverlay = () => {
-        setShowOverlay(!showOverlay);
-    };
+  async function getTopOwners() {
+    try {
+      const response = await fetch("http://localhost:8000/books/topowners", {
+        method: "GET",
+      });
+      const parseRes = await response.json();
+      const topOwners = parseRes.map((owner) => ({
+        username: owner.user_name,
+        books: owner.frequency,
+      }));
+      setBookOwners(topOwners);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
 
-    const handleOverlayClick = (event) => {
-        if (event.target === event.currentTarget) {
-            setShowOverlay(false);
-            setCurrentOffer(null); // Reset current offer when closing overlay
-        }
-    };
+  useEffect(() => {
+    getUsers();
+  }, [manage]);
 
+  useEffect(() => {
+    getTopOwners();
+  }, [manage]);
 
-    return (
-        <>
-            <Navbar isAuth={isAuth} name={name}/>
-            <div className="container mx-auto px-4 py-28">
-                <h1 className="text-xl font-bold text-center mb-4">Welcome {name}!</h1>
-                
-                <div className="flex justify-between mb-4">
-                <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800" onClick={toggleOverlay}>
-                        Add New Offer
-                </button>
-                    <div className="flex">
-                        <button
-                            className={`px-4 mx-2 py-2 ${activeTab === 'offers' ? 'bg-gray-300' : 'bg-white'} rounded-md hover:bg-gray-100`}
-                            onClick={() => setActiveTab('offers')}
-                        >
-                            Manage Offers
-                        </button>
-                        <button
-                            className={`px-4 mx-2 py-2 hover:bg-gray-100 ${activeTab === 'requests' ? 'bg-gray-300' : 'bg-white'} rounded-md`}
-                            onClick={() => setActiveTab('requests')}
-                        >
-                            Manage Requests
-                        </button>
-                    </div>
+  const handleUsersClick = () => {
+    getUsers();
+  };
 
-                    <Link to="/settings"> 
-                    <button
-                        className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
-                    >
-                        User Settings
-                    </button>
-                    </Link>
-                    
-                    
-                </div>
-                {/* New Offer Overlay */}
-                {showOverlay && (
-                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={handleOverlayClick}>
-                                        <div className="bg-white rounded-lg shadow-md overflow-hidden w-96 relative">
-                                            <button className="absolute top-2 right-2 text-black text-xl" onClick={() => setShowOverlay(false)}>&times;</button>
-                                            <form onSubmit={handleSubmit} className="p-6">
-                                                <h2 className="text-lg font-semibold mb-4">{currentOffer ? 'Edit Offer' : 'New Offer'}</h2>
-                                                <div className="mb-4">
-                                                    <label htmlFor="author" className="block text-sm font-medium text-gray-700">Author</label>
-                                                    <input type="text" id="author" name="author" defaultValue={currentOffer ? currentOffer.author : ''} className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
-                                                </div>
-                                                <div className="mb-4">
-                                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
-                                                    <input type="text" id="title" name="title" defaultValue={currentOffer ? currentOffer.title : ''} className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
-                                                </div>
-                                                <div className="mb-4">
-                                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-                                                    <textarea id="description" name="description" rows="4" defaultValue={currentOffer ? currentOffer.details : ''} className="mt-1 p-2 border border-gray-300 rounded-md w-full"></textarea>
-                                                </div>
-                                                <div className="flex justify-end">
-                                                    <button type="submit" className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800">{currentOffer ? 'Update' : 'Submit'}</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                )}
+  const handleBooksClick = () => {
+    getBooks();
+  };
 
-                {/* Conditionally render content based on the active tab */}
-                {activeTab === 'offers' && (
-                    <div className="bg-white shadow-md rounded-lg">
-                        <table className="min-w-full leading-normal">
-                            <thead>
-                                <tr>
-                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Title
-                                    </th>
-                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Author
-                                    </th>
-                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentOffers.map(offer => (
-                                    <tr key={offer.id}>
-                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                            <p className="text-gray-900 whitespace-no-wrap">{offer.title}</p>
-                                        </td>
-                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                            <p className="text-gray-900 whitespace-no-wrap">{offer.author}</p>
-                                        </td>
-                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                            <button
-                                                onClick={() => editOffer(offer.id)}
-                                                className="mr-2 text-white font-bold py-2 px-4 rounded inline-flex items-center bg-black hover:bg-gray-900"
-                                            >
-                                                Edit Offer
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        <Pagination
-                            pagesNo={Math.ceil(offers.length / requestsPerPage)}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                        />
-                    </div>
-                )}
+  const navigate = useNavigate();
 
-                {activeTab === 'requests' && (
-                    <div className="bg-white shadow-md rounded-lg">
-                        <table className="min-w-full leading-normal">
-                            <thead>
-                                <tr>
-                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Title
-                                    </th>
-                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Author
-                                    </th>
-                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        User
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentRequests.map(request => (
-                                    <tr key={request.id}>
-                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                            <p className="text-gray-900 whitespace-no-wrap">{request.title}</p>
-                                        </td>
-                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                            <p className="text-gray-900 whitespace-no-wrap">{request.author}</p>
-                                        </td>
-                                       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                            <a href="/userchoice">
-                                            <button
-                                                className="mr-2 text-white font-bold py-2 px-4 rounded inline-flex items-center bg-black hover:bg-gray-900"
-                                            >
-                                                See offers
-                                            </button>
-                                            </a>
-                                           
-                                            <button
-                                                onClick={() => handleRemoveRequest(request.id)}
-                                                className="text-white font-bold py-2 px-4 rounded inline-flex items-center bg-black hover:bg-gray-900"
-                                            >
-                                                Decline
-                                            </button>
-                                        </td>
-                                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                            <p className="text-gray-900 whitespace-no-wrap">{request.user}</p>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        
-                        <Pagination
-                            pagesNo={Math.ceil(requests.length / requestsPerPage)}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                        />
-                    </div>
-                )}
+  return (
+    <>
+      <Navbar isAuth={isAuth} name={name} />
+
+      <div className="pt-28"></div>
+      <div className="flex justify-center space-x-4 mb-8">
+        <button
+          className={`w-40 rounded-2xl border-2 hover:border-gray-500 p-2 focus:outline-none ${
+            manage === "manageUsers"
+              ? "bg-black text-white"
+              : "bg-gray-100 text-black"
+          }`}
+          onClick={() => {
+            handleUsersClick();
+            setManage("manageUsers");
+          }}
+        >
+          Manage Users
+        </button>
+        <button
+          className={`w-40 rounded-2xl border-2 hover:border-gray-500 p-2 focus:outline-none ${
+            manage === "manageBooks"
+              ? "bg-black text-white"
+              : "bg-gray-100 text-black"
+          }`}
+          onClick={() => {
+            handleBooksClick();
+            setManage("manageBooks");
+          }}
+        >
+          Manage Books
+        </button>
+        <button
+          className={`w-40 rounded-2xl border-2 hover:border-gray-500 p-2 focus:outline-none ${
+            manage === "graphs"
+              ? "bg-black text-white"
+              : "bg-gray-100 text-black"
+          }`}
+          onClick={() => setManage("graphs")}
+        >
+          Graphs
+        </button>
+        <button
+          className={`w-40 rounded-2xl border-2 hover:border-gray-500 p-2 bg-gray-100 text-black focus:outline-none`}
+          onClick={() => {
+            navigate("/settings");
+          }}
+        >
+          Settings
+        </button>
+      </div>
+
+      {manage === "manageUsers" && (
+        <div className="flex flex-col lg:flex-row">
+          <div className="flex-1">
+            <ItemList
+              items={users}
+              willOverlay={true}
+              setItems={setUsers}
+              logged_name={name}
+              type={"users"}
+            />
+          </div>
+          <Sidebar
+            categories={categories}
+            isAuth={isAuth}
+            name={name}
+            type={"users"}
+            className="lg:w-1/3"
+          />
+        </div>
+      )}
+
+      {manage === "manageBooks" && (
+        <div className="flex flex-col lg:flex-row">
+          <div className="flex-1">
+            <ItemList
+              items={books}
+              willOverlay={true}
+              setItems={setBooks}
+              logged_name={name}
+              type={"books"}
+            />
+          </div>
+          <Sidebar
+            categories={categories}
+            isAuth={isAuth}
+            name={name}
+            type={"books"}
+            className="lg:w-1/3"
+          />
+        </div>
+      )}
+
+      {manage === "graphs" && (
+        <div className="flex flex-col space-y-8 mt-10">
+          <div className="flex flex-col lg:flex-row lg:space-x-8">
+            <div className="relative w-full lg:w-1/2 h-96">
+              <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 py-1 z-10">
+                Books by Type
+              </h3>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={renderCustomizedLabel}
+                    outerRadius={80}
+                    innerRadius={0}
+                    fill="#8884d8"
+                    stroke="#000000"
+                    strokeWidth={1}
+                    dataKey="value"
+                  >
+                    {data.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    content={renderLegend}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-        </>
-    );
+            <div className="unordered-list-container lg:w-1/2">
+              <ul className="unordered-list">
+                <li>Dummy text 1</li>
+                <li>Dummy text 2</li>
+                <li>Dummy text 3</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row lg:space-x-8">
+            <div className="relative w-full lg:w-1/2 h-96">
+              <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 py-1 z-10">
+                Top 5 Users by Points
+              </h3>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={top5Userpoints}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <XAxis dataKey="user_name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="user_points"
+                    fill="#000000"
+                    barSize={50}
+                    name="Points"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="unordered-list-container lg:w-1/2">
+              <ul className="unordered-list">
+                <li>Dummy text 1</li>
+                <li>Dummy text 2</li>
+                <li>Dummy text 3</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row lg:space-x-8">
+            <div className="relative w-full lg:w-1/2 h-96">
+              <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 py-1 z-10">
+                Top 5 Users by Books
+              </h3>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={bookOwners}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <XAxis dataKey="username" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="books"
+                    fill="#000000"
+                    barSize={50}
+                    name="Books"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="unordered-list-container lg:w-1/2">
+              <ul className="unordered-list">
+                <li>Dummy text 1</li>
+                <li>Dummy text 2</li>
+                <li>Dummy text 3</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 export default Dashboard;

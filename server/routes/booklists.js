@@ -57,7 +57,6 @@ router.post("/submit", async (req, res) => {
     const cond = submitcheck.rows[0];
 
     if (submitcheck.rows.length > 0) {
-      
       const userOwns = await pool.query(
         `SELECT entry_id FROM booksentry 
          JOIN userbase ON booksentry.u_id = userbase.user_id 
@@ -197,6 +196,17 @@ router.post("/transact", async (req, res) => {
   } catch (error) {
     console.error("Error during transaction:", error);
     res.status(500).json({ error: "Server error", details: error.message });
+  }
+});
+
+router.get("/topowners", async (req, res) => {
+  try {
+    const topowners = await pool.query(
+      "SELECT ub.user_name, frequency FROM ( SELECT u_id, COUNT(u_id) AS frequency FROM booksentry GROUP BY u_id ORDER BY frequency DESC LIMIT 5 ) AS top_users JOIN userbase ub ON top_users.u_id = ub.user_id;"
+    );
+    res.send(topowners.rows);
+  } catch (error) {
+    res.send(`Error getting top book owners: ${error}`);
   }
 });
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-function Item({ book, willOverlay, logged_name }) {
+function Item({ item, willOverlay, logged_name, type }) {
   const [items, setItems] = useState([]);
   const navigate = useNavigate();
 
@@ -9,7 +9,7 @@ function Item({ book, willOverlay, logged_name }) {
     try {
       const response = await fetch(
         `http://localhost:8000/books/whoowns?book_name=${encodeURIComponent(
-          book.name
+          item.name
         )}`,
         {
           method: "GET",
@@ -23,7 +23,7 @@ function Item({ book, willOverlay, logged_name }) {
         user_email: user.user_email,
         user_area: user.user_area,
         user_points: user.user_points,
-        user_id: user.user_id
+        user_id: user.user_id,
       }));
 
       setItems(userList);
@@ -31,7 +31,6 @@ function Item({ book, willOverlay, logged_name }) {
       console.error(error.message);
     }
   }
-
   const handleProfile = (owner) => {
     navigate(`/profile`, {
       state: {
@@ -39,7 +38,7 @@ function Item({ book, willOverlay, logged_name }) {
         user_email: owner.user_email,
         user_area: owner.user_area,
         user_points: owner.user_points,
-        user_id: owner.user_id
+        user_id: owner.user_id,
       },
     });
   };
@@ -52,7 +51,7 @@ function Item({ book, willOverlay, logged_name }) {
         user_area: owner.user_area,
         user_points: owner.user_points,
         book: book,
-        user_id: owner.user_id
+        user_id: owner.user_id,
       },
     });
   };
@@ -74,29 +73,59 @@ function Item({ book, willOverlay, logged_name }) {
       whoOwns();
     }
   }, [isClicked]);
+
   return (
     <>
-      <tr
-        className="bg-white border border-gray-400 rounded-lg hover:shadow-lg transition-shadow duration-300 relative"
-        onClick={toggleOverlay}
-      >
-        <td className="text-sm font-semibold px-5 py-3 border-b-2 border-gray-200">
-          {book.author}
-        </td>
-        <td className="text-md font-bold px-5 py-3 border-b-2 border-gray-200">
-          {book.name}
-        </td>
-        <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
-          {book.genre}
-        </td>
-        <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
-          {book.points}
-        </td>
-        <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
-          {book.type}
-        </td>
-      </tr>
-      {isClicked && willOverlay && (
+      {type == "books" && (
+        <tr
+          className="bg-white border border-gray-400 rounded-lg hover:shadow-lg transition-shadow duration-300 relative"
+          onClick={toggleOverlay}
+        >
+          <td className="text-sm font-semibold px-5 py-3 border-b-2 border-gray-200">
+            {item.author}
+          </td>
+          <td className="text-md font-bold px-5 py-3 border-b-2 border-gray-200">
+            {item.name}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.genre}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.points}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.type}
+          </td>
+        </tr>
+      )}
+
+      {type == "users" && (
+        <tr
+          className="bg-white border border-gray-400 rounded-lg hover:shadow-lg transition-shadow duration-300 relative"
+          onClick={toggleOverlay}
+        >
+          <td className="text-sm font-semibold px-5 py-3 border-b-2 border-gray-200">
+            {item.user_id}
+          </td>
+          <td className="text-md font-bold px-5 py-3 border-b-2 border-gray-200">
+            {item.user_name}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.user_email}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.user_area}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.user_points}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.bandays}
+          </td>
+        </tr>
+      )}
+
+      {isClicked && willOverlay && type == "books" && (
         <div
           className="overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
           onClick={handleOverlayClick}
@@ -110,13 +139,13 @@ function Item({ book, willOverlay, logged_name }) {
             </button>
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-800">
-                {book.name}
+                {item.name}
               </h2>
-              <p className="text-gray-600">{book.author}</p>
+              <p className="text-gray-600">{item.author}</p>
               <p className="text-gray-600">
-                Cost: {book.points} {book.points > 1 ? "points" : "point"}
+                Cost: {item.points} {item.points > 1 ? "points" : "point"}
               </p>
-              <p className="text-gray-600">{book.type}</p>
+              <p className="text-gray-600">{item.type}</p>
             </div>
             <div>
               <p className="text-lg font-semibold text-gray-800 mb-2">
@@ -144,7 +173,7 @@ function Item({ book, willOverlay, logged_name }) {
                         onClick={(e) => {
                           toggleOverlay(e);
                           e.preventDefault();
-                          handleUserChoice(owner, book);
+                          handleUserChoice(owner, item);
                         }}
                       >
                         Choose

@@ -64,10 +64,9 @@ router.post("/login", validInfo, async (req, res) => {
       return;
     }
 
-    const adminCheck = await pool.query(`SELECT * FROM userbase WHERE user_name='${username}' AND isAdmin=TRUE`);
-    const isAdmin = adminCheck.rows.length >= 1;
+    
     const token = jwtGenerator(user.rows[0].user_id);
-    res.json({ token, isAdmin });
+    res.json({ token });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -76,7 +75,9 @@ router.post("/login", validInfo, async (req, res) => {
 
 router.get("/is-verify", authorization, async (req, res) => {
   try {
-    res.json(true);
+    const adminCheck = await pool.query(`SELECT * FROM userbase WHERE user_name='${req.header("username")}' AND isAdmin=TRUE`);
+    const isAdmin = adminCheck.rows.length >= 1;
+    res.json({verify: true, isAdmin: isAdmin});
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");

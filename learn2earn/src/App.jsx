@@ -51,12 +51,13 @@ function App() {
     try {
       const response = await fetch("http://localhost:8000/auth/is-verify", {
         method: "GET",
-        headers: { token: localStorage.token },
+        headers: { token: localStorage.token, username: user.name },
       });
 
       const parseRes = await response.json();
 
-      parseRes === true ? setIsAuth(true) : setIsAuth(false);
+      parseRes.verify === true ? setIsAuth(true) : setIsAuth(false);
+      parseRes.isAdmin === true ? setIsAdmin(true) : setIsAdmin(false);
     } catch (error) {
       console.error(error.message);
     }
@@ -85,11 +86,8 @@ function App() {
 
   useEffect(() => {
     getName();
-  });
-
-  useEffect(() => {
     checkIsAuth();
-  }, []);
+  });
 
   return (
     <BrowserRouter>
@@ -110,7 +108,11 @@ function App() {
         <Route
           path="/home"
           element={
-            <Main isAuth={isAuth} name={user.name} categories={categories} />
+            !isAuth ? (
+              <Main isAuth={isAuth} name={user.name} categories={categories} />
+            ) : (
+              <Navigate to="/login" />
+            )
           }
         />
         <Route
@@ -156,6 +158,7 @@ function App() {
                 setIsAuth={setIsAuth}
                 isAuth={isAuth}
                 name={user.name}
+                checkIsAuth={checkIsAuth}
               />
             ) : (
               <Navigate to="/home" />
@@ -177,18 +180,27 @@ function App() {
         <Route
           path="/profile"
           element={
-            !isAdmin ? (
-              <Profile
-                isAuth={isAuth}
-                name={user.name}
-                area={user.area}
-                email={user.email}
-                upoints={user.upoints}
-                categories={categories}
-                u_id={user.id}
-              />
+            isAuth ? (
+              isAdmin ? (
+                <Dashboard
+                  name={user.name}
+                  isAuth={isAuth}
+                  categories={categories}
+                />
+              ) : (
+                <Profile
+                  isAdmin={isAdmin}
+                  isAuth={isAuth}
+                  name={user.name}
+                  area={user.area}
+                  email={user.email}
+                  upoints={user.upoints}
+                  categories={categories}
+                  u_id={user.id}
+                />
+              )
             ) : (
-              <Dashboard name={user.name} isAuth={isAuth} />
+              <Navigate to="/login" />
             )
           }
         />
