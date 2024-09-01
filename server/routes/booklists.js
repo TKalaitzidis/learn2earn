@@ -210,4 +210,13 @@ router.get("/topowners", async (req, res) => {
   }
 });
 
+router.get("/bookowners", async (req, res) => {
+  try {
+    bookowners = await pool.query("SELECT books.book_name,userbase.user_name FROM booksentry JOIN books on booksentry.b_id=books.book_id JOIN userbase ON booksentry.u_id=userbase.user_id;")
+    res.json(bookowners.rows);
+  } catch (error) {
+    res.send(`Error getting book owners: ${error}`);
+  }
+})
+
 module.exports = router;

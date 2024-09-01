@@ -43,6 +43,20 @@ function App() {
     "Humor",
   ];
 
+  const cities = [
+    "Athens",
+    "Thessaloniki",
+    "Patras",
+    "Heraklion",
+    "Larissa",
+    "Volos",
+    "Rhodes",
+    "Ioannina",
+    "Chania",
+    "Chalcis",
+  ]; 
+  
+
   const [isAuth, setIsAuth] = useState(false);
   const [user, setUser] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -133,7 +147,7 @@ function App() {
           path="/register"
           element={
             !isAuth ? (
-              <Register setIsAuth={setIsAuth} isAuth={isAuth} />
+              <Register setIsAuth={setIsAuth} isAuth={isAuth} cities={cities} />
             ) : (
               <Navigate to="/profile" />
             )
@@ -186,6 +200,7 @@ function App() {
                   name={user.name}
                   isAuth={isAuth}
                   categories={categories}
+                  cities={cities}
                 />
               ) : (
                 <Profile

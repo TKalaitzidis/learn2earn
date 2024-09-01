@@ -5,19 +5,7 @@ import { MdEmail, MdTry } from "react-icons/md";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-function Register({setIsAuth, isAuth}) {
-  const cities = [
-    "Athens",
-    "Thessaloniki",
-    "Patras",
-    "Heraklion",
-    "Larissa",
-    "Volos",
-    "Rhodes",
-    "Ioannina",
-    "Chania",
-    "Chalcis",
-  ]; 
+function Register({setIsAuth, isAuth, cities}) {
   
   const [data, setData] = useState({
     email: '',

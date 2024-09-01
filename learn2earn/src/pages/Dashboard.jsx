@@ -72,11 +72,12 @@ const renderCustomizedLabel = ({
   );
 };
 
-function Dashboard({ isAuth, name, categories }) {
+function Dashboard({ isAuth, name, categories, cities }) {
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
   const [allBooks, setAllBooks] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [topOwners, setTopOwners] = useState([]);
   const [bookOwners, setBookOwners] = useState([]);
   const [manage, setManage] = useState("manageUsers");
 
@@ -127,9 +128,54 @@ function Dashboard({ isAuth, name, categories }) {
     }
   }
 
+  const usersPerCity = allUsers.reduce((acc, { user_area }) => {
+    acc[user_area] = (acc[user_area] || 0) + 1;
+    return acc;
+  }, {});
+
+  const averageUsersPerCity =
+    Object.keys(usersPerCity).length > 0
+      ? Math.floor(
+          Object.values(usersPerCity).reduce((sum, count) => sum + count, 0) /
+            Object.keys(usersPerCity).length
+        )
+      : 0;
+
+  const mostPopularGenre = allBooks.reduce((acc, book) => {
+    acc[book.genre] = (acc[book.genre] || 0) + 1;
+    return acc;
+  }, {});
+
+  const topGenre = Object.keys(mostPopularGenre).reduce(
+    (a, b) => (mostPopularGenre[a] > mostPopularGenre[b] ? a : b),
+    ""
+  );
+
+  const averagePoints =
+    users.length > 0
+      ? Math.floor(
+          users.reduce((sum, user) => sum + user.user_points, 0) / users.length
+        )
+      : 0;
+
   let top5Userpoints = [...users]
     .sort((a, b) => b.user_points - a.user_points)
     .slice(0, 5);
+
+  const popularAreas = cities
+    .map((city) => ({
+      city,
+      count: users.filter((user) => user.user_area === city).length,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const popularBooks = allBooks
+    .map((book) => ({
+      book,
+      count: bookOwners.filter((owner) => owner.book_name === book.name).length,
+    }))
+    .sort((a, b) => b.count - a.count);
 
   async function getTopOwners() {
     try {
@@ -141,19 +187,51 @@ function Dashboard({ isAuth, name, categories }) {
         username: owner.user_name,
         books: owner.frequency,
       }));
-      setBookOwners(topOwners);
+      setTopOwners(topOwners);
     } catch (error) {
       console.error(error.message);
     }
   }
-
+  async function getBookOwners() {
+    try {
+      const response = await fetch("http://localhost:8000/books/bookowners", {
+        method: "GET",
+      });
+      const parseRes = await response.json();
+      const owners = parseRes.map((owner) => ({
+        user_name: owner.user_name,
+        book_name: owner.book_name,
+      }));
+      setBookOwners(owners);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
   useEffect(() => {
     getUsers();
   }, [manage]);
 
+
+  const averageBooksperCity = Math.floor(
+    bookOwners.length /
+    new Set(allUsers.map((user) => user.user_area)).size
+  )
+  
+  const averageBooksPerUser =
+    new Set(bookOwners.map((owner) => owner.user_name)).size > 0
+      ? Math.floor(
+          bookOwners.length /
+            new Set(bookOwners.map((owner) => owner.user_name)).size
+        )
+      : 0;
+
   useEffect(() => {
     getTopOwners();
   }, [manage]);
+
+  useEffect(() => {
+    getBookOwners();
+  }, [, manage]);
 
   const handleUsersClick = () => {
     getUsers();
@@ -263,9 +341,11 @@ function Dashboard({ isAuth, name, categories }) {
         <div className="flex flex-col space-y-8 mt-10">
           <div className="flex flex-col lg:flex-row lg:space-x-8">
             <div className="relative w-full lg:w-1/2 h-96">
-              <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 py-1 z-10">
-                Books by Type
-              </h3>
+              <div className="m-12">
+                <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 py-1 z-10">
+                  Books by Type
+                </h3>
+              </div>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -296,20 +376,18 @@ function Dashboard({ isAuth, name, categories }) {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="unordered-list-container lg:w-1/2">
+            <div className="unordered-list-container lg:w-1/2 flex items-center justify-center">
               <ul className="unordered-list">
-                <li>Dummy text 1</li>
-                <li>Dummy text 2</li>
-                <li>Dummy text 3</li>
+                <li>Most Popular Genre: {topGenre}</li>
+                <li>Most Popular Book: {popularBooks[0].book.name}</li>
               </ul>
             </div>
-          </div>
-
-          <div className="flex flex-col lg:flex-row lg:space-x-8">
             <div className="relative w-full lg:w-1/2 h-96">
-              <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 py-1 z-10">
-                Top 5 Users by Points
-              </h3>
+              <div className="m-12">
+                <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 py-1 z-10">
+                  Top 5 Users by Points
+                </h3>
+              </div>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={top5Userpoints}
@@ -328,23 +406,23 @@ function Dashboard({ isAuth, name, categories }) {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="unordered-list-container lg:w-1/2">
+            <div className="unordered-list-container lg:w-1/2 flex items-center justify-center">
               <ul className="unordered-list">
-                <li>Dummy text 1</li>
-                <li>Dummy text 2</li>
-                <li>Dummy text 3</li>
+                <li>Active Users: {allUsers.length}</li>
+                <li>Average Points by User: {averagePoints}</li>
               </ul>
             </div>
           </div>
-
           <div className="flex flex-col lg:flex-row lg:space-x-8">
-            <div className="relative w-full lg:w-1/2 h-96">
-              <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 py-1 z-10">
-                Top 5 Users by Books
-              </h3>
+            <div className="relative m-12 w-full lg:w-1/2 h-96">
+              <div className="m-12">
+                <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 pt-1 z-10">
+                  Top 5 Users by Books
+                </h3>
+              </div>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={bookOwners}
+                  data={topOwners}
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <XAxis dataKey="username" />
@@ -360,11 +438,44 @@ function Dashboard({ isAuth, name, categories }) {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="unordered-list-container lg:w-1/2">
+            <div className="unordered-list-container lg:w-1/2 flex items-center justify-center">
               <ul className="unordered-list">
-                <li>Dummy text 1</li>
-                <li>Dummy text 2</li>
-                <li>Dummy text 3</li>
+                <li>
+                  Banned Users:{" "}
+                  {allUsers.filter((user) => user.bandays > 0).length}
+                </li>
+                <li>Average Books per User: {averageBooksPerUser}</li>
+              </ul>
+            </div>
+
+            <div className="relative m-12 w-full lg:w-1/2 h-96">
+              <div className="mt-12">
+                <h3 className="absolute top-0 left-1/2 transform -translate-x-1/2 font-semibold bg-white px-2 pt-1 z-10">
+                  5 Most Popular Cities
+                </h3>
+              </div>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={popularAreas}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <XAxis dataKey="city" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="count"
+                    fill="#000000"
+                    barSize={50}
+                    name="Books"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="unordered-list-container lg:w-1/2 flex items-center justify-center">
+              <ul className="unordered-list">
+                <li>Average Books per City: {averageBooksperCity}</li>
+                <li>Average Users per City: {averageUsersPerCity}</li>
               </ul>
             </div>
           </div>
