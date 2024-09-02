@@ -307,6 +307,7 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
           willOverlay={queryParams ? true : false}
           items={items}
           logged_name={name}
+          type={"books"}
         />
         <Sidebar
           categories={categories}
@@ -314,6 +315,7 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
           onTypeChange={handleTypeChange}
           currentCategory={currentCategory}
           currentType={currentType}
+          type={"books"}
         />
       </div>
     </div>

@@ -125,22 +125,23 @@ function Item({
           user_email: editedUser.user_email,
           user_area: editedUser.user_area,
           user_points: editedUser.user_points,
-          oldName: editedUser.user_name,
-          user_bandays: editedUser.bandays,
+          oldName: item.user_name,
+          user_bandays: editedUser.user_bandays,
         }),
       });
+
 
       const parseRes = await response.text();
 
       if (parseRes == "Updated User Info Successfully.") {
         toast.success(parseRes);
         setEditedUser({
-          user_name: item.user_name,
-          user_email: item.user_email,
-          user_area: item.user_area,
-          user_points: item.user_points,
-          oldName: item.user_name,
-          user_bandays: item.bandays,
+          user_name: editedUser.user_name,
+          user_email: editedUser.user_email,
+          user_area: editedUser.user_area,
+          user_points: editedUser.user_points,
+          oldName: editedUser.user_name,
+          user_bandays: editedUser.bandays,
         });
       } else {
         toast.error(parseRes);
@@ -249,6 +250,7 @@ function Item({
   };
 
   const handleUserSubmit = (e) => {
+    
     e.preventDefault();
     editUser();
     getUsers();

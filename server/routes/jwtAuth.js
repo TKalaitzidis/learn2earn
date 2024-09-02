@@ -54,6 +54,13 @@ router.post("/login", validInfo, async (req, res) => {
       return;
     }
 
+    const checkIfBan = await pool.query (`SELECT bandays FROM userbase WHERE user_name = '${username}'`);
+
+    if(checkIfBan.rows[0].bandays>0){
+      res.status(401).json(`User is Banned for ${checkIfBan.rows[0].bandays} day${checkIfBan.rows[0].bandays>1?"s":""}`);
+      return;
+    };
+
     const validPassword = await bcrypt.compare(
       password,
       user.rows[0].user_pass

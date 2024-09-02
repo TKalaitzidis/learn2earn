@@ -238,6 +238,13 @@ router.post("/edituser", async (req, res) => {
       user_bandays,
     } = req.body;
 
+    console.log(user_name,
+      user_email,
+      user_area,
+      user_points,
+      oldName,
+      user_bandays);
+
     checkName = await pool.query(`SELECT * FROM userbase WHERE user_name='${oldName}'`);
     if(checkName.rows.length>0){
       await pool.query(

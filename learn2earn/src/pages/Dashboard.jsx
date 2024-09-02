@@ -80,7 +80,66 @@ function Dashboard({ isAuth, name, categories, cities }) {
   const [topOwners, setTopOwners] = useState([]);
   const [bookOwners, setBookOwners] = useState([]);
   const [manage, setManage] = useState("manageUsers");
+  const [currentCategory, setCurrentCategory] = useState("All");
+  const [currentCity, setCurrentCity] = useState("All");
+  const [currentType, setCurrentType] = useState("All Types");
+  const [currentBan, setCurrentBan] = useState("All Users");
 
+  const handleBookCategoryChange = (selectedCategory) => {
+    setCurrentCategory(selectedCategory);
+    if (selectedCategory === "All") {
+      setBooks(allBooks);
+    } else {
+      const filteredBooks = allBooks.filter(
+        (book) => book.genre === selectedCategory
+      );
+      setBooks(filteredBooks);
+    }
+  };
+
+  const handleUserCityChange = (selectedCity) => {
+    setCurrentCity(selectedCity);
+    if (selectedCity === "All") {
+      setUsers(allUsers);
+    } else {
+      const filteredUsers = allUsers.filter(
+        (user) => user.user_area === selectedCity
+      );
+      setUsers(filteredUsers);
+    }
+  };
+
+  const handleUserBanChange = (selectedSetting) => {
+    setCurrentBan(selectedSetting);
+    if (selectedSetting === "All Users") {
+      setUsers(allUsers);
+    }
+    else if (selectedSetting === "Banned Users") {
+      const filteredUsers = allUsers.filter(
+        (user) => user.bandays > 0
+      );
+      setUsers(filteredUsers);
+    } else if (selectedSetting === "Not Banned Users") {
+      const filteredUsers = allUsers.filter(
+        (user) => user.bandays == 0
+      );
+      setUsers(filteredUsers);
+    }
+  };
+
+  const citiesFilter = ["All", ...cities];
+
+  const handleBookTypeChange = (selectedType) => {
+    setCurrentType(selectedType);
+    if (selectedType === "All Types") {
+      setBooks(allBooks);
+    } else {
+      const filteredBooks = allBooks.filter(
+        (book) => book.type === selectedType
+      );
+      setBooks(filteredBooks);
+    }
+  };
   async function getBooks() {
     try {
       const response = await fetch("http://localhost:8000/books/itemlist", {
@@ -103,7 +162,7 @@ function Dashboard({ isAuth, name, categories, cities }) {
 
   useEffect(() => {
     getBooks();
-  }, [,manage]);
+  }, [, manage]);
 
   async function getUsers() {
     try {
@@ -211,12 +270,10 @@ function Dashboard({ isAuth, name, categories, cities }) {
     getUsers();
   }, [manage]);
 
-
   const averageBooksperCity = Math.floor(
-    bookOwners.length /
-    new Set(allUsers.map((user) => user.user_area)).size
-  )
-  
+    bookOwners.length / new Set(allUsers.map((user) => user.user_area)).size
+  );
+
   const averageBooksPerUser =
     new Set(bookOwners.map((owner) => owner.user_name)).size > 0
       ? Math.floor(
@@ -313,6 +370,11 @@ function Dashboard({ isAuth, name, categories, cities }) {
             isAuth={isAuth}
             name={name}
             type={"users"}
+            cities={citiesFilter}
+            onUserCityChange={handleUserCityChange}
+            onUserBanChange={handleUserBanChange}
+            currentCity={currentCity}
+            currentBan={currentBan}
             className="lg:w-1/3"
           />
         </div>
@@ -337,6 +399,10 @@ function Dashboard({ isAuth, name, categories, cities }) {
             isAuth={isAuth}
             name={name}
             type={"books"}
+            currentCategory={currentCategory}
+            currentType={currentType}
+            onCategoryChange={handleBookCategoryChange}
+            onTypeChange={handleBookTypeChange}
             className="lg:w-1/3"
           />
         </div>

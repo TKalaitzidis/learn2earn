@@ -160,8 +160,9 @@ function Main({ isAuth, name, categories }) {
           onTypeChange={handleTypeChange}
           currentCategory={currentCategory}
           currentType={currentType}
+          type={"books"}
         />
-        <ItemList items={items} willOverlay={true} setItems={setItems} logged_name={name}/>
+        <ItemList items={items} willOverlay={true} setItems={setItems} logged_name={name} type={"books"}/>
       </div>
     </div>
   );

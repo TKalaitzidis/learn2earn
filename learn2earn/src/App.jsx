@@ -42,7 +42,7 @@ function App() {
     "Classics",
     "Humor",
   ];
-
+  
   const cities = [
     "Athens",
     "Thessaloniki",
@@ -54,8 +54,7 @@ function App() {
     "Ioannina",
     "Chania",
     "Chalcis",
-  ]; 
-  
+  ];
 
   const [isAuth, setIsAuth] = useState(false);
   const [user, setUser] = useState([]);
@@ -122,8 +121,12 @@ function App() {
         <Route
           path="/home"
           element={
-            !isAuth ? (
-              <Main isAuth={isAuth} name={user.name} categories={categories} />
+           !isAdmin ? (
+              <Main
+                isAuth={isAuth}
+                name={user.name}
+                categories={categories}
+              />
             ) : (
               <Navigate to="/login" />
             )
