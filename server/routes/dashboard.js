@@ -86,7 +86,11 @@ router.get("/exists", async (req, res) => {
 
       request
         .then((result) => {
-          res.status(200).send("Reset successful. Email sent: " + result.body.Messages[0].Status);
+          res
+            .status(200)
+            .send(
+              "Reset successful. Email sent: " + result.body.Messages[0].Status
+            );
         })
         .catch((err) => {
           console.error("Error sending email:", err);
@@ -180,16 +184,16 @@ router.post("/changemail", validInfo, async (req, res) => {
       `SELECT * FROM userbase WHERE user_email = '${new_mail}';`
     );
     if (checkExists.rows.length > 0) {
-      res.json({alreadyExists: "Email already exists."});
+      res.json({ alreadyExists: "Email already exists." });
     } else {
       await pool.query(
         `UPDATE userbase SET user_email = '${new_mail}' WHERE user_name = '${user_name}';`
       );
 
-      res.json({success:"Changed Email successfully."});
+      res.json({ success: "Changed Email successfully." });
     }
   } catch (error) {
-    res.json({error: `Error changing email: ${error}`});
+    res.json({ error: `Error changing email: ${error}` });
   }
 });
 
@@ -212,12 +216,41 @@ router.post("/changepass", async (req, res) => {
   }
 });
 
-router.get("/getusers", async (req, res) =>{
+router.get("/getusers", async (req, res) => {
   try {
-    users = await pool.query("SELECT user_id,user_name,user_email,user_area,user_points,isadmin,isbanned,bandays FROM userbase;");
+    users = await pool.query(
+      "SELECT user_id,user_name,user_email,user_area,user_points,isadmin,isbanned,bandays FROM userbase;"
+    );
     res.send(users.rows);
   } catch (error) {
     res.send(`Error getting users: ${error}`);
+  }
+});
+
+router.post("/edituser", async (req, res) => {
+  try {
+    const {
+      user_name,
+      user_email,
+      user_area,
+      user_points,
+      oldName,
+      user_bandays,
+    } = req.body;
+
+    checkName = await pool.query(`SELECT * FROM userbase WHERE user_name='${oldName}'`);
+    if(checkName.rows.length>0){
+      await pool.query(
+        `UPDATE userbase SET user_name='${user_name}', user_email= '${user_email}', user_area='${user_area}', user_points=${user_points}, bandays=${user_bandays} WHERE user_name='${oldName}';`
+      );
+      res.send("Updated User Info Successfully.");
+    }
+    else{
+      res.send("User doesn't exist.");
+    }
+    
+  } catch (error) {
+    res.send(`Error Updating User Info: ${error}`);
   }
 });
 

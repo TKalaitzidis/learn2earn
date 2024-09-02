@@ -103,7 +103,7 @@ function Dashboard({ isAuth, name, categories, cities }) {
 
   useEffect(() => {
     getBooks();
-  }, [manage]);
+  }, [,manage]);
 
   async function getUsers() {
     try {
@@ -303,7 +303,9 @@ function Dashboard({ isAuth, name, categories, cities }) {
               willOverlay={true}
               setItems={setUsers}
               logged_name={name}
+              cities={cities}
               type={"users"}
+              getUsers={getUsers}
             />
           </div>
           <Sidebar
@@ -325,6 +327,9 @@ function Dashboard({ isAuth, name, categories, cities }) {
               setItems={setBooks}
               logged_name={name}
               type={"books"}
+              isAdmin={true}
+              categories={categories}
+              getBooks={getBooks}
             />
           </div>
           <Sidebar

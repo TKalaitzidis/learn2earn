@@ -219,4 +219,26 @@ router.get("/bookowners", async (req, res) => {
   }
 })
 
+router.post("/editbook", async (req, res) => {
+  try {
+    const { name, author, points, genre, type, oldName } = req.body;
+    await pool.query(`UPDATE books SET book_name='${name}', book_author='${author}', book_genre='${genre}', book_points='${points}', book_type='${type}' WHERE book_name='${oldName}';`)
+    
+    res.send("Book Editted Successfully.");
+  } catch (error) {
+    res.send(`Error editing the book: ${error}`)
+  }
+})
+
+router.post("/removeowner", async (req, res) => {
+  try {
+    const { user_id, book_name } = req.body;
+    book_id = await pool.query(`SELECT book_id FROM books WHERE book_name='${book_name}';`);
+    await pool.query(`DELETE FROM booksentry WHERE u_id=${user_id} AND b_id=${book_id.rows[0].book_id};`);
+    res.send("Entry Deleted Successfully.");
+  } catch (error) {
+    res.send(`Error removing owner: ${error}`);
+  }
+})
+
 module.exports = router;
