@@ -74,8 +74,11 @@ router.post("/submit", async (req, res) => {
           user_id,
         ]);
         await pool.query(
-          "UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;",
-          [user_id]
+          `UPDATE userbase SET ${
+            cond.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+          } = ${
+            cond.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+          } + ${cond.book_points} WHERE user_id = ${user_id};`
         );
         res.send("Submitted successfully");
       }
@@ -89,9 +92,13 @@ router.post("/submit", async (req, res) => {
         booksubmit.rows[0].book_id.toString(),
         user_id,
       ]);
+
       await pool.query(
-        "UPDATE userbase SET user_points = user_points + 1 WHERE user_id = $1;",
-        [user_id]
+        `UPDATE userbase SET ${
+          book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } = ${
+          book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } + 1 WHERE user_id = ${user_id};`
       );
       res.send("New book submitted successfully.");
     }
@@ -125,24 +132,33 @@ router.post("/transact", async (req, res) => {
       [book_name]
     );
     const book = bookres.rows[0];
+
     const pointsCheck = await pool.query(
-      "SELECT * FROM userbase WHERE user_points>$1 AND user_name=$2;",
-      [book.book_points, buyer_name]
+      `SELECT * FROM userbase WHERE ${
+        book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+      }>${book.book_points} AND user_name='${buyer_name}';`
     );
 
     if (pointsCheck.rows.length > 0) {
       await pool.query(
-        "UPDATE userbase SET user_points = user_points + $1 WHERE user_name = $2;",
-        [book.book_points, owner_name]
+        `UPDATE userbase SET ${
+          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } = ${
+          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } + ${book.book_points} WHERE user_name = '${owner_name}';`
       );
       await pool.query(
-        "UPDATE userbase SET user_points = user_points - $1 WHERE user_name = $2;",
-        [book.book_points, buyer_name]
+        `UPDATE userbase SET ${
+          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } = ${
+          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } - ${book.book_points} WHERE user_name = '${buyer_name}';`
       );
       await pool.query(
         "DELETE FROM booksentry WHERE b_id = $1 AND u_id = $2;",
         [book.book_id, owner_id]
       );
+
       const request = mailjet.post("send", { version: "v3.1" }).request({
         Messages: [
           {
@@ -212,33 +228,52 @@ router.get("/topowners", async (req, res) => {
 
 router.get("/bookowners", async (req, res) => {
   try {
-    bookowners = await pool.query("SELECT books.book_name,userbase.user_name FROM booksentry JOIN books on booksentry.b_id=books.book_id JOIN userbase ON booksentry.u_id=userbase.user_id;")
+    bookowners = await pool.query(
+      "SELECT books.book_name,userbase.user_name FROM booksentry JOIN books on booksentry.b_id=books.book_id JOIN userbase ON booksentry.u_id=userbase.user_id;"
+    );
     res.json(bookowners.rows);
   } catch (error) {
     res.send(`Error getting book owners: ${error}`);
   }
-})
+});
 
 router.post("/editbook", async (req, res) => {
   try {
     const { name, author, points, genre, type, oldName } = req.body;
-    await pool.query(`UPDATE books SET book_name='${name}', book_author='${author}', book_genre='${genre}', book_points='${points}', book_type='${type}' WHERE book_name='${oldName}';`)
-    
+    await pool.query(
+      `UPDATE books SET book_name='${name}', book_author='${author}', book_genre='${genre}', book_points='${points}', book_type='${type}' WHERE book_name='${oldName}';`
+    );
+
     res.send("Book Editted Successfully.");
   } catch (error) {
-    res.send(`Error editing the book: ${error}`)
+    res.send(`Error editing the book: ${error}`);
   }
-})
+});
 
 router.post("/removeowner", async (req, res) => {
   try {
     const { user_id, book_name } = req.body;
-    book_id = await pool.query(`SELECT book_id FROM books WHERE book_name='${book_name}';`);
-    await pool.query(`DELETE FROM booksentry WHERE u_id=${user_id} AND b_id=${book_id.rows[0].book_id};`);
+    book = await pool.query(
+      `SELECT * FROM books WHERE book_name='${book_name}';`
+    );
+    await pool.query(
+      `DELETE FROM booksentry WHERE u_id=${user_id} AND b_id=${book.rows[0].book_id};`
+    );
+    await pool.query(
+      `UPDATE userbase SET ${
+        book.rows[0].book_type === "Physical"
+          ? "user_ph_points"
+          : "user_pdf_points"
+      }= ${
+        book.rows[0].book_type === "Physical"
+          ? "user_ph_points"
+          : "user_pdf_points"
+      }-${book.rows[0].book_points} WHERE user_id=${user_id};`
+    );
     res.send("Entry Deleted Successfully.");
   } catch (error) {
     res.send(`Error removing owner: ${error}`);
   }
-})
+});
 
 module.exports = router;

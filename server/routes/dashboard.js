@@ -219,7 +219,7 @@ router.post("/changepass", async (req, res) => {
 router.get("/getusers", async (req, res) => {
   try {
     users = await pool.query(
-      "SELECT user_id,user_name,user_email,user_area,user_points,isadmin,isbanned,bandays FROM userbase;"
+      "SELECT user_id,user_name,user_email,user_area,user_points, user_pdf_points, user_ph_points,isadmin,bandays FROM userbase;"
     );
     res.send(users.rows);
   } catch (error) {
@@ -233,29 +233,23 @@ router.post("/edituser", async (req, res) => {
       user_name,
       user_email,
       user_area,
-      user_points,
+      user_ph_points,
+      user_pdf_points,
       oldName,
       user_bandays,
     } = req.body;
 
-    console.log(user_name,
-      user_email,
-      user_area,
-      user_points,
-      oldName,
-      user_bandays);
-
-    checkName = await pool.query(`SELECT * FROM userbase WHERE user_name='${oldName}'`);
-    if(checkName.rows.length>0){
+    checkName = await pool.query(
+      `SELECT * FROM userbase WHERE user_name='${oldName}'`
+    );
+    if (checkName.rows.length > 0) {
       await pool.query(
-        `UPDATE userbase SET user_name='${user_name}', user_email= '${user_email}', user_area='${user_area}', user_points=${user_points}, bandays=${user_bandays} WHERE user_name='${oldName}';`
+        `UPDATE userbase SET user_name='${user_name}', user_email= '${user_email}', user_area='${user_area}', user_ph_points=${user_ph_points}, user_pdf_points=${user_pdf_points},bandays=${user_bandays} WHERE user_name='${oldName}';`
       );
       res.send("Updated User Info Successfully.");
-    }
-    else{
+    } else {
       res.send("User doesn't exist.");
     }
-    
   } catch (error) {
     res.send(`Error Updating User Info: ${error}`);
   }

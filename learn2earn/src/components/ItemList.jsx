@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Item from "./Item";
 import Pagination from "./Pagination";
 
-function ItemList({items, username, willOverlay, setItems, logged_name, type, getUsers, isAdmin, categories, getBooks,cities}) {
+function ItemList({items, username, willOverlay, setItems, logged_name, type, getUsers, isAdmin, categories, getBooks,cities, logged_id}) {
     const [currentPage, setCurrentPage] = useState(1);
 
     const itemsPerPage = 20;
@@ -49,6 +49,7 @@ function ItemList({items, username, willOverlay, setItems, logged_name, type, ge
                                     isAdmin={isAdmin}
                                     categories={categories}
                                     getBooks={getBooks}
+                                    logged_id={logged_id}
                                 />
                             ))}
                         </tbody>

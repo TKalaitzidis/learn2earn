@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../components/Navbar.jsx";
 import ToC from "../components/ToC.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function UserChoice({ isAuth, name, area, email, u_id }) {
   const location = useLocation();

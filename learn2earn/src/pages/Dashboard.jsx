@@ -164,6 +164,8 @@ function Dashboard({ isAuth, name, categories, cities }) {
     getBooks();
   }, [, manage]);
 
+  
+
   async function getUsers() {
     try {
       const response = await fetch("http://localhost:8000/dashboard/getusers", {
@@ -175,6 +177,8 @@ function Dashboard({ isAuth, name, categories, cities }) {
         user_name: user.user_name,
         user_email: user.user_email,
         user_area: user.user_area,
+        user_ph_points: user.user_ph_points,
+        user_pdf_points: user.user_pdf_points,
         user_points: user.user_points,
         isadmin: user.isadmin,
         isbanned: user.isbanned,

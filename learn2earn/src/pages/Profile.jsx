@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import ItemList from "../components/ItemList";
 import Sidebar from "../components/Sidebar.jsx";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id }) {
+function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id, phpoints, pdfpoints }) {
   const location = useLocation();
   const queryParams = location.state;
 
+  const navigate = useNavigate();
+  
   const [items, setItems] = useState([]);
   const [isOverlay, setIsOverlay] = useState(false);
   const [allBooks, setAllBooks] = useState([]);
@@ -26,6 +28,8 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
     email: queryParams?.user_email || email,
     area: queryParams?.user_area || area,
     points: queryParams?.user_points || upoints,
+    pdfpoints: queryParams?.user_pdf_points|| pdfpoints,
+    phpoints: queryParams?.user_ph_points|| phpoints
   });
 
   const inpCategories = categories.filter((item) => item !== "All");
@@ -125,7 +129,7 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
       }
       
       userbooks();
-      
+      navigate(0);
       setIsOverlay(false);
     } catch (error) {
       toast.error(error.message);
@@ -139,6 +143,8 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
       email: queryParams?.user_email || email,
       area: queryParams?.user_area || area,
       points: queryParams?.user_points || upoints,
+      pdfpoints: queryParams?.user_pdf_points|| pdfpoints,
+      phpoints: queryParams?.user_ph_points|| phpoints
     });
   }, [location]);
 
@@ -163,7 +169,7 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
             <div className="flex flex-col md:flex-row justify-between w-full md:ml-4">
               <div className="flex flex-col mb-2 md:mb-0 md:mr-4">
                 <p className="text-gray-600">Location: {user.area}</p>
-                <p className="text-gray-600">Points: {user.points}</p>
+                <p className="text-gray-600">Points: {user.phpoints} Ph. & {user.pdfpoints} PDF</p>
               </div>
               <div className="flex flex-col">
                 <p className="text-gray-600">Books Offering: {items.length}</p>
@@ -307,6 +313,7 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
           willOverlay={queryParams ? true : false}
           items={items}
           logged_name={name}
+          logged_id={u_id}
           type={"books"}
         />
         <Sidebar

@@ -12,6 +12,7 @@ function Item({
   getBooks,
   getUsers,
   cities,
+  logged_id,
 }) {
   const [items, setItems] = useState([]);
   const navigate = useNavigate();
@@ -28,7 +29,8 @@ function Item({
     user_name: item.user_name,
     user_email: item.user_email,
     user_area: item.user_area,
-    user_points: item.user_points,
+    user_ph_points: item.user_ph_points,
+    user_pdf_points: item.user_pdf_points,
     oldName: item.user_name,
     user_bandays: item.bandays,
   });
@@ -115,6 +117,31 @@ function Item({
     }
   }
 
+  async function deleteUser() {
+    try {
+      const response = await fetch(
+        "http://localhost:8000/dashboard/deleteuser",
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_name: item.user_name,
+          }),
+        }
+      );
+
+      const parseRes = await response.text();
+
+      if (parseRes == "Deleted successfully.") {
+        toast.success(parseRes);
+      } else {
+        toast.error(parseRes);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
   async function editUser() {
     try {
       const response = await fetch(`http://localhost:8000/dashboard/edituser`, {
@@ -124,12 +151,12 @@ function Item({
           user_name: editedUser.user_name,
           user_email: editedUser.user_email,
           user_area: editedUser.user_area,
-          user_points: editedUser.user_points,
+          user_ph_points: editedUser.user_ph_points,
+          user_pdf_points: editedUser.user_pdf_points,
           oldName: item.user_name,
           user_bandays: editedUser.user_bandays,
         }),
       });
-
 
       const parseRes = await response.text();
 
@@ -158,6 +185,8 @@ function Item({
         user_email: owner.user_email,
         user_area: owner.user_area,
         user_points: owner.user_points,
+        user_pdf_points: owner.user_pdf_points,
+        user_ph_points: owner.user_ph_points,
         user_id: owner.user_id,
       },
     });
@@ -170,6 +199,8 @@ function Item({
         user_email: owner.user_email,
         user_area: owner.user_area,
         user_points: owner.user_points,
+        user_pdf_points: owner.user_pdf_points,
+        user_ph_points: owner.user_ph_points,
         book: book,
         user_id: owner.user_id,
       },
@@ -182,6 +213,13 @@ function Item({
 
   const handleEditUserClick = () => {
     setIsUserEditing(true);
+  };
+
+  const handleDeleteUser = () => {
+    deleteUser();
+    getUsers();
+    setIsClicked(false);
+    navigate(0);
   };
 
   const handleCancel = () => {
@@ -210,6 +248,11 @@ function Item({
 
   const handleRemove = (owner, item) => {
     removeOwner(owner.user_id, item.name);
+  };
+
+  const handleRemoveProf = (logged_id, item) => {
+    removeOwner(logged_id, item.name);
+    navigate(0);
   };
 
   const handleInputChange = (e) => {
@@ -250,7 +293,6 @@ function Item({
   };
 
   const handleUserSubmit = (e) => {
-    
     e.preventDefault();
     editUser();
     getUsers();
@@ -263,7 +305,7 @@ function Item({
     <>
       {type == "books" && (
         <tr
-          className="bg-white border border-gray-400 rounded-lg hover:shadow-lg transition-shadow duration-300 relative"
+          className="bg-white border group border-gray-400 rounded-lg hover:shadow-lg transition-shadow duration-300 relative"
           onClick={toggleOverlay}
         >
           <td className="text-sm font-semibold px-5 py-3 border-b-2 border-gray-200">
@@ -281,6 +323,14 @@ function Item({
           <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
             {item.type}
           </td>
+          {!willOverlay && (
+            <button
+              onClick={() => handleRemoveProf(logged_id, item)}
+              className="absolute opacity-0 top-2 right-2 text-gray-500 text-2xl font-bold group-hover:opacity-100 transition-opacity duration-300"
+            >
+              &times;
+            </button>
+          )}
         </tr>
       )}
 
@@ -302,7 +352,7 @@ function Item({
             {item.user_area}
           </td>
           <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
-            {item.user_points}
+            {item.user_ph_points} Ph. & {item.user_pdf_points} PDF
           </td>
           <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
             {item.bandays}
@@ -530,8 +580,8 @@ function Item({
                   </h2>
                   <p className="text-gray-600">{item.user_email}</p>
                   <p className="text-gray-600">
-                    {item.user_area}, {item.user_points}{" "}
-                    {item.user_points > 1 ? "points" : "point"}
+                    {item.user_area}, {item.user_ph_points} Ph. &{" "}
+                    {item.user_pdf_points} PDF
                   </p>
                   {item.bandays > 0 && (
                     <p className="text-gray-600">
@@ -543,6 +593,12 @@ function Item({
                     onClick={handleEditUserClick}
                   >
                     Edit User Info
+                  </button>
+                  <button
+                    className="ml-4 mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-2 rounded"
+                    onClick={handleDeleteUser}
+                  >
+                    Delete User
                   </button>
                 </>
               ) : (
@@ -564,11 +620,19 @@ function Item({
                       onChange={handleUserInputChange}
                       className="w-full p-2 mb-2 border rounded"
                     />
-                    <h4>User Points</h4>
+                    <h4>User Physical Points</h4>
                     <input
                       type="number"
-                      name="user_points"
-                      value={editedUser.user_points}
+                      name="user_ph_points"
+                      value={editedUser.user_ph_points}
+                      onChange={handleUserInputChange}
+                      className="w-full p-2 mb-2 border rounded"
+                    />
+                    <h4>User PDF Points</h4>
+                    <input
+                      type="number"
+                      name="user_pdf_points"
+                      value={editedUser.user_pdf_points}
                       onChange={handleUserInputChange}
                       className="w-full p-2 mb-2 border rounded"
                     />

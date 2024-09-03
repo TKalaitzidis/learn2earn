@@ -91,6 +91,8 @@ function App() {
         id: parseRes.user_id,
         area: parseRes.user_area,
         upoints: parseRes.user_points,
+        pdfpoints: parseRes.user_pdf_points,
+        phpoints: parseRes.user_ph_points
       });
     } catch (error) {
       console.error(error.message);
@@ -213,6 +215,8 @@ function App() {
                   area={user.area}
                   email={user.email}
                   upoints={user.upoints}
+                  pdfpoints={user.pdfpoints}
+                  phpoints={user.phpoints}
                   categories={categories}
                   u_id={user.id}
                 />
