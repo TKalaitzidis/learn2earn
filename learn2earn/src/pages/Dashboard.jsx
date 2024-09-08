@@ -179,7 +179,7 @@ function Dashboard({ isAuth, name, categories, cities }) {
         user_area: user.user_area,
         user_ph_points: user.user_ph_points,
         user_pdf_points: user.user_pdf_points,
-        user_points: user.user_points,
+        user_points: user.user_ph_points + user.user_pdf_points,
         isadmin: user.isadmin,
         isbanned: user.isbanned,
         bandays: user.bandays,

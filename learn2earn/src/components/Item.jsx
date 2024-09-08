@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FaCheck } from "react-icons/fa";
 
 function Item({
   item,
@@ -55,8 +56,7 @@ function Item({
         user_name: user.user_name,
         user_email: user.user_email,
         user_area: user.user_area,
-        user_points: user.user_points,
-        user_id: user.user_id,
+        user_id: user.user_id
       }));
 
       setItems(userList);
@@ -86,6 +86,29 @@ function Item({
       }
     } catch (error) {
       toast.error(error.message);
+    }
+  }
+
+  async function completeRequest(decision) {
+    try {
+
+      const response = await fetch(`http://localhost:8000/books/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          b_id: item.book_id,
+          buyer_id: item.requester_id,
+          owner_id: item.offerer_id,
+          request_id: item.request_id,
+          decision: decision
+        }),
+      });
+
+      const parseRes = await response.text();
+      
+    } catch (error) {
+      toast.error(error.message);
+      debugger;
     }
   }
 
@@ -166,7 +189,8 @@ function Item({
           user_name: editedUser.user_name,
           user_email: editedUser.user_email,
           user_area: editedUser.user_area,
-          user_points: editedUser.user_points,
+          user_ph_points: editedUser.user_ph_points,
+          user_pdf_points: editedUser.user_pdf_points,
           oldName: editedUser.user_name,
           user_bandays: editedUser.bandays,
         });
@@ -184,7 +208,7 @@ function Item({
         user_name: owner.user_name,
         user_email: owner.user_email,
         user_area: owner.user_area,
-        user_points: owner.user_points,
+  
         user_pdf_points: owner.user_pdf_points,
         user_ph_points: owner.user_ph_points,
         user_id: owner.user_id,
@@ -198,7 +222,7 @@ function Item({
         user_name: owner.user_name,
         user_email: owner.user_email,
         user_area: owner.user_area,
-        user_points: owner.user_points,
+        
         user_pdf_points: owner.user_pdf_points,
         user_ph_points: owner.user_ph_points,
         book: book,
@@ -236,11 +260,12 @@ function Item({
 
   const handleUserCancel = () => {
     setIsUserEditing(false);
-    setEditedBook({
+    setEditedUser({
       user_name: item.user_name,
       user_email: item.user_email,
       user_area: item.user_area,
-      user_points: item.user_points,
+      user_pdf_points: item.user_pdf_points,
+      user_ph_points: item.user_ph_points,
       oldName: item.user_name,
       user_bandays: item.bandays,
     });
@@ -252,6 +277,11 @@ function Item({
 
   const handleRemoveProf = (logged_id, item) => {
     removeOwner(logged_id, item.name);
+    navigate(0);
+  };
+
+  const handleCompleteRequest = (decision) => {
+    completeRequest(decision);
     navigate(0);
   };
 
@@ -331,6 +361,58 @@ function Item({
               &times;
             </button>
           )}
+        </tr>
+      )}
+
+      {type == "history" && (
+        <tr
+          className="bg-white border group border-gray-400 rounded-lg hover:shadow-lg transition-shadow duration-300 relative"
+          onClick={toggleOverlay}
+        >
+          <td className="text-sm font-semibold px-5 py-3 border-b-2 border-gray-200">
+            {item.author}
+          </td>
+          <td className="text-md font-bold px-5 py-3 border-b-2 border-gray-200">
+            {item.name}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.genre}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.points}
+          </td>
+          <td className="text-xs px-5 py-3 border-b-2 border-gray-200">
+            {item.type}
+          </td>
+        </tr>
+      )}
+
+      {type == "requests" && (
+        <tr
+          className="bg-white border group border-gray-400 rounded-lg hover:shadow-lg transition-shadow duration-300 relative"
+          onClick={toggleOverlay}
+        >
+          <td className="text-sm font-semibold px-5 py-3 border-b-2 border-gray-200">
+            {item.book_name}
+          </td>
+          <td className="text-md font-bold px-5 py-3 border-b-2 border-gray-200">
+            {item.user_name}
+          </td>
+
+          <button
+            onClick={() => handleCompleteRequest(true)}
+            className="absolute opacity-0 top-3 right-2 text-gray-500 text-sm font-bold group-hover:opacity-100 transition-opacity duration-300 pr-8"
+          >
+            <div className="bg-black px-2 py-2 rounded-md text-white ">
+              <FaCheck />
+            </div>
+          </button>
+          <button
+            onClick={() => handleCompleteRequest(false)}
+            className="absolute opacity-0 top-2 right-2 text-gray-500 text-2xl font-bold group-hover:opacity-100 transition-opacity duration-300"
+          >
+            &times;
+          </button>
         </tr>
       )}
 

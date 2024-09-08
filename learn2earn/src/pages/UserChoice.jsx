@@ -12,8 +12,11 @@ function UserChoice({ isAuth, name, area, email, u_id }) {
 
   const [transInfo, setTransInfo] = useState({
     book_name: queryParams.book.name,
+    book_id: queryParams.book.id,
     owner_name: queryParams.user_name,
     buyer_name: name,
+    buyer_id: u_id,
+    buyer_email: email,
     owner_id: queryParams.user_id,
     owner_email: queryParams.user_email,
     form_firstname: "",

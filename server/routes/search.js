@@ -6,7 +6,7 @@ router.get("/", async (req, res) => {
         
       const {term} = req.query;
       
-      const books = await pool.query(`SELECT * FROM books WHERE LOWER(book_name || ' ' || book_author) LIKE '%' || LOWER('${term}') || '%' ;`);
+      const books = await pool.query(`SELECT * FROM books WHERE LOWER(book_name || ' ' || book_author || ' ' || book_genre) LIKE '%' || LOWER('${term}') || '%' ;`);
 
       res.json(books.rows);
     } catch (error) {

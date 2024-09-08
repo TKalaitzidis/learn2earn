@@ -8,7 +8,6 @@ CREATE TABLE userbase (
     user_area VARCHAR(255) NOT NULL,
     user_ph_points INT DEFAULT 3 CHECK (user_ph_points >= 0),
     user_pdf_points INT DEFAULT 3 CHECK (user_pdf_points >= 0),
-    user_points INT DEFAULT 6 CHECK (user_points >= 0),
     isAdmin BOOLEAN DEFAULT FALSE,
     banDays INT DEFAULT 0 CHECK (banDays >= 0)
 );
@@ -24,6 +23,33 @@ CREATE TABLE booksentry(
         REFERENCES userbase (user_id)
 );
 
+CREATE TABLE history(
+    entry_id SERIAL PRIMARY KEY,
+    b_id INT,
+    u_id INT,
+    FOREIGN KEY (b_id)
+        REFERENCES books (book_id),
+    FOREIGN KEY (u_id)
+        REFERENCES userbase (user_id)
+);
+
+CREATE TABLE requests(
+    request_id SERIAL PRIMARY KEY,
+    b_id INT,
+    requester_id INT,
+    offerer_id INT,
+    FOREIGN KEY (b_id)
+        REFERENCES books (book_id),
+    FOREIGN KEY (requester_id)
+        REFERENCES userbase (user_id),
+    FOREIGN KEY (offerer_id)
+        REFERENCES userbase (user_id)
+);
+
+INSERT INTO history
+SELECT * FROM booksentry;
+
+
 ALTER TABLE booksentry
 DROP CONSTRAINT booksentry_u_id_fkey;
 
@@ -37,8 +63,6 @@ CREATE TABLE books (
     book_name VARCHAR(255) NOT NULL,
     book_author VARCHAR(255) NOT NULL,
     book_genre VARCHAR(255) NOT NULL,
-    book_ph_points INT DEFAULT 1,
-    book_pdf_points INT DEFAULT 1,
     book_points INT DEFAULT 1,
     book_type VARCHAR(50) CHECK (book_type IN ('Physical', 'PDF'))
 );
@@ -75,6 +99,8 @@ INSERT INTO booksentry (b_id, u_id) VALUES
 (3, 4),
 (4, 5),
 (5, 2);
+
+INSERT INTO history SELECT * FROM booksentry;
 
 SELECT
     books.book_name,

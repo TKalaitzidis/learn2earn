@@ -219,7 +219,7 @@ router.post("/changepass", async (req, res) => {
 router.get("/getusers", async (req, res) => {
   try {
     users = await pool.query(
-      "SELECT user_id,user_name,user_email,user_area,user_points, user_pdf_points, user_ph_points,isadmin,bandays FROM userbase;"
+      "SELECT user_id,user_name,user_email,user_area, user_pdf_points, user_ph_points,isadmin,bandays FROM userbase;"
     );
     res.send(users.rows);
   } catch (error) {

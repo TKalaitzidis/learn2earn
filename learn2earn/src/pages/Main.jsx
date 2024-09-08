@@ -139,7 +139,7 @@ function Main({ isAuth, name, categories }) {
           <form onSubmit={onSearch} className="flex w-full max-w-4xl">
             <input
               type="text"
-              placeholder="Search Authors or Book Titles"
+              placeholder="Search Author, Book Title or Genre"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="border-2 border-gray-300 bg-white h-10 px-5 rounded-l-lg flex-grow focus:outline-none"
@@ -162,6 +162,7 @@ function Main({ isAuth, name, categories }) {
           currentType={currentType}
           type={"books"}
         />
+        <h1 className="ml-64 p-5 text-xl text-center font-semibold">Books available by our users</h1>
         <ItemList items={items} willOverlay={true} setItems={setItems} logged_name={name} type={"books"}/>
       </div>
     </div>

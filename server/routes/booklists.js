@@ -18,10 +18,24 @@ router.get("/itemlist", async (req, res) => {
   }
 });
 
+router.get("/history", async (req, res) => {
+  try {
+    const userHistory = await pool.query(
+      "SELECT books.book_name, books.book_author, books.book_genre, books.book_points, " +
+        "books.book_type FROM history JOIN userbase ON history.u_id = userbase.user_id " +
+        "JOIN books ON history.b_id = books.book_id WHERE userbase.user_name=$1;",
+      [req.query.username]
+    );
+    res.send(userHistory.rows);
+  } catch (error) {
+    res.status(500).json("Server error");
+  }
+});
+
 router.get("/whoowns", async (req, res) => {
   try {
     const users = await pool.query(
-      "SELECT userbase.user_name, userbase.user_email, userbase.user_area, userbase.user_points, userbase.user_id FROM booksentry JOIN userbase ON booksentry.u_id " +
+      "SELECT userbase.user_name, userbase.user_email, userbase.user_area, userbase.user_id FROM booksentry JOIN userbase ON booksentry.u_id " +
         "= userbase.user_id JOIN books ON booksentry.b_id = books.book_id WHERE books.book_name = $1;",
       [req.query.book_name]
     );
@@ -73,6 +87,10 @@ router.post("/submit", async (req, res) => {
           cond.book_id.toString(),
           user_id,
         ]);
+        await pool.query("INSERT INTO history(b_id, u_id) VALUES($1,$2);", [
+          cond.book_id.toString(),
+          user_id,
+        ]);
         await pool.query(
           `UPDATE userbase SET ${
             cond.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
@@ -88,7 +106,7 @@ router.post("/submit", async (req, res) => {
         [book_name, book_author, book_genre, book_type]
       );
 
-      await pool.query("INSERT INTO booksentry(b_id, u_id) VALUES($1,$2);", [
+      await pool.query("INSERT INTO history(b_id, u_id) VALUES($1,$2);", [
         booksubmit.rows[0].book_id.toString(),
         user_id,
       ]);
@@ -114,6 +132,8 @@ router.post("/transact", async (req, res) => {
       book_name,
       owner_name,
       buyer_name,
+      buyer_id,
+      buyer_email,
       owner_id,
       owner_email,
       form_firstname,
@@ -133,63 +153,81 @@ router.post("/transact", async (req, res) => {
     );
     const book = bookres.rows[0];
 
+    
+    let request;
+
     const pointsCheck = await pool.query(
       `SELECT * FROM userbase WHERE ${
         book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
-      }>${book.book_points} AND user_name='${buyer_name}';`
+      }>=${book.book_points} AND user_name='${buyer_name}';`
     );
+
+
 
     if (pointsCheck.rows.length > 0) {
       await pool.query(
-        `UPDATE userbase SET ${
-          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
-        } = ${
-          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
-        } + ${book.book_points} WHERE user_name = '${owner_name}';`
+        `INSERT INTO requests (b_id, requester_id, offerer_id) VALUES (${book.book_id},${buyer_id},${owner_id})`
       );
-      await pool.query(
-        `UPDATE userbase SET ${
-          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
-        } = ${
-          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
-        } - ${book.book_points} WHERE user_name = '${buyer_name}';`
-      );
-      await pool.query(
-        "DELETE FROM booksentry WHERE b_id = $1 AND u_id = $2;",
-        [book.book_id, owner_id]
-      );
-
-      const request = mailjet.post("send", { version: "v3.1" }).request({
-        Messages: [
-          {
-            From: {
-              Email: "learn2earnproj@gmail.com",
-              Name: "Learn2Earn",
-            },
-            To: [
-              {
-                Email: owner_email,
-                Name: owner_name,
+      
+      if (book.book_type === "Physical") {
+        request = mailjet.post("send", { version: "v3.1" }).request({
+          Messages: [
+            {
+              From: {
+                Email: "learn2earnproj@gmail.com",
+                Name: "Learn2Earn",
               },
-            ],
-            Subject: `Book Transaction successful: ${book_name}`,
-            HTMLPart: `
-                  <h3>Book Transaction successful: ${book_name}</h3>
-                  <p>Your book "${book_name}" has successfully been picked by user: ${buyer_name}. You should now send it to the following address:</p>
-                  <div style="border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
-                    <p><strong>Recipient:</strong> ${form_firstname} ${form_lastname}</p>
-                    <p><strong>Address:</strong> ${form_streetname} ${form_number}</p>
-                    <p><strong>Floor:</strong> ${form_floor}</p>
-                    <p><strong>City:</strong> ${form_city}</p>
-                    <p><strong>Postal Code:</strong> ${form_postal}</p>
-                    <p><strong>State:</strong> ${form_state}</p>
-                    <p><strong>Country:</strong> ${form_country}</p>
-                  </div>
-                  <p>If you fail to send the book to the address in more than 14 days, your account will be penalized.</p>
-                `,
-          },
-        ],
-      });
+              To: [
+                {
+                  Email: owner_email,
+                  Name: owner_name,
+                },
+              ],
+              Subject: `Book Transaction successful: ${book_name}`,
+              HTMLPart: `
+                    <h3>Book Transaction successful: ${book_name}</h3>
+                    <p>Your book "${book_name}" has successfully been picked by user: ${buyer_name}. You should now send it to the following address:</p>
+                    <div style="border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+                      <p><strong>Recipient:</strong> ${form_firstname} ${form_lastname}</p>
+                      <p><strong>Address:</strong> ${form_streetname} ${form_number}</p>
+                      <p><strong>Floor:</strong> ${form_floor}</p>
+                      <p><strong>City:</strong> ${form_city}</p>
+                      <p><strong>Postal Code:</strong> ${form_postal}</p>
+                      <p><strong>State:</strong> ${form_state}</p>
+                      <p><strong>Country:</strong> ${form_country}</p>
+                    </div>
+                    <p>If you fail to send the book to the address in more than 14 days, your account will be penalized.</p>
+                  `,
+            },
+          ],
+        });
+      } else {
+        request = mailjet.post("send", { version: "v3.1" }).request({
+          Messages: [
+            {
+              From: {
+                Email: "learn2earnproj@gmail.com",
+                Name: "Learn2Earn",
+              },
+              To: [
+                {
+                  Email: owner_email,
+                  Name: owner_name,
+                },
+              ],
+              Subject: `Book Transaction successful: ${book_name}`,
+              HTMLPart: `
+                    <h3>Book Transaction successful: ${book_name}</h3>
+                    <p>Your book "${book_name}" has successfully been picked by user: ${buyer_name}. You should now send it to the following e-mail:</p>
+                    <div style="border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+                      <p><strong>${buyer_email}</p>
+                    </div>
+                    <p>If you fail to send the book to this e-mail in more than 14 days, your account will be penalized.</p>
+                  `,
+            },
+          ],
+        });
+      }
 
       request
         .then((result) => {
@@ -212,6 +250,63 @@ router.post("/transact", async (req, res) => {
   } catch (error) {
     console.error("Error during transaction:", error);
     res.status(500).json({ error: "Server error", details: error.message });
+  }
+});
+
+router.post("/complete", async (req, res) => {
+  try {
+    const { b_id, buyer_id, owner_id, request_id, decision } = req.body;
+    
+    if (decision) {
+      const bookres = await pool.query(
+        `SELECT * FROM books WHERE book_id=${b_id}`
+      );
+      const book = bookres.rows[0];
+
+      await pool.query(
+        `UPDATE userbase SET ${
+          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } = ${
+          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } + ${book.book_points} WHERE user_id = ${owner_id};`
+      );
+      await pool.query(
+        `UPDATE userbase SET ${
+          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } = ${
+          book.book_type === "Physical" ? "user_ph_points" : "user_pdf_points"
+        } - ${book.book_points} WHERE user_id = ${buyer_id};`
+      );
+
+      await pool.query(
+        `DELETE FROM requests WHERE b_id=${b_id} AND offerer_id=${owner_id}`
+      );
+
+      if (book.book_type === "Physical") {
+        await pool.query(
+          "DELETE FROM booksentry WHERE b_id = $1 AND u_id = $2;",
+          [book.book_id, owner_id]
+        );
+      }
+    } else {
+      await pool.query(`DELETE FROM requests WHERE request_id = ${request_id}`);
+    }
+
+    res.send("Request Completed Successfully.");
+  } catch (error) {
+    res.send(error);
+  }
+});
+
+router.get("/getrequests", async (req, res) => {
+  try {
+    
+    const requests = await pool.query(
+      `SELECT b_id, requester_id, offerer_id, request_id, requester.user_name, book_name FROM requests JOIN books ON b_id=books.book_id JOIN userbase AS requester ON requester_id=requester.user_id JOIN userbase AS offerer ON offerer_id=offerer.user_id WHERE offerer_id=${req.query.offerer_id};`
+    );
+    res.send(requests.rows);
+  } catch (error) {
+    res.send(`Error getting requests: ${error}`);
   }
 });
 

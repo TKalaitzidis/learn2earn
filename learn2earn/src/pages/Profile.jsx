@@ -6,14 +6,27 @@ import Sidebar from "../components/Sidebar.jsx";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id, phpoints, pdfpoints }) {
+function Profile({
+  name,
+  isAuth,
+  isAdmin,
+  area,
+  email,
+  categories,
+  u_id,
+  phpoints,
+  pdfpoints,
+}) {
   const location = useLocation();
   const queryParams = location.state;
 
   const navigate = useNavigate();
-  
+
   const [items, setItems] = useState([]);
   const [isOverlay, setIsOverlay] = useState(false);
+  const [isHistOverlay, setIsHistOverlay] = useState(false);
+  const [isReqOverlay, setIsReqOverlay] = useState(false);
+
   const [allBooks, setAllBooks] = useState([]);
   const [input, setInput] = useState({
     book_name: "",
@@ -23,13 +36,15 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
     user_id: u_id,
   });
 
+  const [history, setHistory] = useState([]);
+  const [requests, setRequests] = useState([]);
+
   const [user, setUser] = useState({
     name: queryParams?.user_name || name,
     email: queryParams?.user_email || email,
     area: queryParams?.user_area || area,
-    points: queryParams?.user_points || upoints,
-    pdfpoints: queryParams?.user_pdf_points|| pdfpoints,
-    phpoints: queryParams?.user_ph_points|| phpoints
+    pdfpoints: queryParams?.user_pdf_points || pdfpoints,
+    phpoints: queryParams?.user_ph_points || phpoints,
   });
 
   const inpCategories = categories.filter((item) => item !== "All");
@@ -38,9 +53,30 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
     setIsOverlay(!isOverlay);
   };
 
+  const toggleHistOverlay = () => {
+    console.log(isHistOverlay);
+    setIsHistOverlay(!isHistOverlay);
+  };
+
+  const toggleReqOverlay = () => {
+    setIsReqOverlay(!isReqOverlay);
+  };
+
   const handleOverlayClick = (e) => {
     if (e.target.classList.contains("overlay")) {
       setIsOverlay(false);
+    }
+  };
+
+  const handleHistOverlayClick = (e) => {
+    if (e.target.classList.contains("overlay")) {
+      setIsHistOverlay(false);
+    }
+  };
+
+  const handleReqOverlayClick = (e) => {
+    if (e.target.classList.contains("overlay")) {
+      setIsReqOverlay(false);
     }
   };
 
@@ -103,6 +139,66 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
     }
   }
 
+  async function userhistory() {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/books/history?username=${encodeURIComponent(
+          user.name
+        )}`,
+        {
+          method: "GET",
+        }
+      );
+
+      const parseRes = await response.json();
+      const resHist = parseRes.map((book) => ({
+        author: book.book_author,
+        name: book.book_name,
+        genre: book.book_genre,
+        points: book.book_points,
+        type: book.book_type,
+      }));
+
+      const userHist = resHist.filter(
+        (book) =>
+          !allBooks.some(
+            (histBook) => JSON.stringify(book) === JSON.stringify(histBook)
+          )
+      );
+
+      setHistory(userHist);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
+  async function getRequests() {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/books/getrequests?offerer_id=${encodeURIComponent(
+          u_id
+        )}`,
+        {
+          method: "GET",
+        }
+      );
+
+      const parseRes = await response.json();
+      const resReqs = parseRes.map((request) => ({
+        book_id: request.b_id,
+        requester_id: request.requester_id,
+        offerer_id: request.offerer_id,
+        request_id: request.request_id,
+        user_name: request.user_name,
+        book_name: request.book_name,
+      }));
+
+      setRequests(resReqs);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
   const submit = async (e) => {
     e.preventDefault();
 
@@ -127,7 +223,7 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
       } else {
         toast.error(parseRes);
       }
-      
+
       userbooks();
       navigate(0);
       setIsOverlay(false);
@@ -138,17 +234,18 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
 
   useEffect(() => {
     userbooks();
+    userhistory();
+    getRequests();
     setUser({
       name: queryParams?.user_name || name,
       email: queryParams?.user_email || email,
       area: queryParams?.user_area || area,
-      points: queryParams?.user_points || upoints,
-      pdfpoints: queryParams?.user_pdf_points|| pdfpoints,
-      phpoints: queryParams?.user_ph_points|| phpoints
+      pdfpoints: queryParams?.user_pdf_points || pdfpoints,
+      phpoints: queryParams?.user_ph_points || phpoints,
     });
   }, [location]);
 
-  
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar isAuth={isAuth} name={name} />
@@ -169,7 +266,9 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
             <div className="flex flex-col md:flex-row justify-between w-full md:ml-4">
               <div className="flex flex-col mb-2 md:mb-0 md:mr-4">
                 <p className="text-gray-600">Location: {user.area}</p>
-                <p className="text-gray-600">Points: {user.phpoints} Ph. & {user.pdfpoints} PDF</p>
+                <p className="text-gray-600">
+                  Points: {user.phpoints} Ph. & {user.pdfpoints} PDF
+                </p>
               </div>
               <div className="flex flex-col">
                 <p className="text-gray-600">Books Offering: {items.length}</p>
@@ -180,7 +279,7 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
         </div>
       </div>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        {user.name == name && (
+        {user.name == name ? (
           <div>
             <div className="flex justify-center space-x-4 mb-8">
               <button
@@ -195,10 +294,37 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
                   User Settings
                 </button>
               </Link>
+
+              <button
+                className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
+                onClick={() => {
+                  if (history) {
+                    toggleHistOverlay();
+                  } else {
+                    toast.error(
+                      `All books ${user.name} ever owned are currently active.`
+                    );
+                  }
+                }}
+              >
+                User History
+              </button>
+              <button
+                className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
+                onClick={() => {
+                  if (requests.length>0) {
+                    toggleReqOverlay();
+                  } else {
+                    toast.error(`You do not have any requests right now.`);
+                  }
+                }}
+              >
+                Manage Requests
+              </button>
             </div>
             {isOverlay && (
               <div
-                className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                className="fixed overlay inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
                 onClick={handleOverlayClick}
               >
                 <div className="bg-white rounded-lg shadow-md overflow-hidden w-96 relative">
@@ -305,8 +431,79 @@ function Profile({ name, isAuth, isAdmin, area, email, upoints, categories, u_id
                 </div>
               </div>
             )}
+
+            {isReqOverlay && (
+              <div
+                className="fixed inset-0 overlay bg-black bg-opacity-50 flex justify-center items-center z-50"
+                onClick={handleReqOverlayClick}
+              >
+                <div className="bg-white rounded-lg shadow-md overflow-hidden w-auto relative">
+                  <button
+                    className="absolute top-2 right-2 text-black text-xl"
+                    onClick={() => setIsReqOverlay(false)}
+                  >
+                    &times;
+                  </button>
+                  <h1 className="mx-72 my-10 font-semibold">Requests</h1>
+                  <ItemList
+                    username={user.name}
+                    willOverlay={false}
+                    items={requests}
+                    logged_id={u_id}
+                    type={"requests"}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className="flex justify-center mb-8">
+              <button
+                className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
+                onClick={() => {
+                  if (!history) {
+                    toggleHistOverlay();
+                  } else {
+                    toast.error(
+                      `All books ${user.name} ever owned are currently active.`
+                    );
+                  }
+                }}
+              >
+                User History
+              </button>
+            </div>
           </div>
         )}
+        {isHistOverlay && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+            onClick={handleHistOverlayClick}
+          >
+            <div className="bg-white rounded-lg shadow-md overflow-hidden w-auto relative">
+              <button
+                className="absolute top-2 right-2 text-black text-xl"
+                onClick={() => setIsHistOverlay(false)}
+              >
+                &times;
+              </button>
+              <h1 className="mx-72 my-10 font-semibold">
+                Books Previously owned by {user.name}:
+              </h1>
+              <ItemList
+                username={user.name}
+                willOverlay={false}
+                items={history}
+                logged_id={u_id}
+                type={"history"}
+              />
+            </div>
+          </div>
+        )}
+        <h1 className="ml-64 p-5 text-xl text-center font-semibold">
+          Books offered by user {user.name}
+        </h1>
 
         <ItemList
           username={user.name}
