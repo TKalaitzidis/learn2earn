@@ -35,7 +35,7 @@ router.get("/history", async (req, res) => {
 router.get("/whoowns", async (req, res) => {
   try {
     const users = await pool.query(
-      "SELECT userbase.user_name, userbase.user_email, userbase.user_area, userbase.user_id FROM booksentry JOIN userbase ON booksentry.u_id " +
+      "SELECT userbase.user_name, userbase.user_email, userbase.user_area, userbase.user_id, userbase.user_ph_points, userbase.user_pdf_points FROM booksentry JOIN userbase ON booksentry.u_id " +
         "= userbase.user_id JOIN books ON booksentry.b_id = books.book_id WHERE books.book_name = $1;",
       [req.query.book_name]
     );

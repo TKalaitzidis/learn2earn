@@ -56,7 +56,9 @@ function Item({
         user_name: user.user_name,
         user_email: user.user_email,
         user_area: user.user_area,
-        user_id: user.user_id
+        user_id: user.user_id,
+        user_pdf_points: user.user_pdf_points,
+        user_ph_points: user.user_ph_points
       }));
 
       setItems(userList);
