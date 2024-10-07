@@ -13,7 +13,6 @@ Learn2Earn is a full-stack web application designed to facilitate book trading b
 - [Environment Variables](#environment-variables)
 - [Database Setup](#database-setup)
 - [Running the Application](#running-the-application)
-- [Screenshots](#screenshots)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -117,8 +116,6 @@ The application will be running at:
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:5000`
 
-## Screenshots
-*(Include screenshots of your app interface here)*
 
 ## Contributing
 
