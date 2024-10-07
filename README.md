@@ -1,7 +1,3 @@
-Here's a draft for your `README.md` file for Learn2Earn:
-
----
-
 # Learn2Earn - Book Trading Platform
 
 Learn2Earn is a full-stack web application designed to facilitate book trading between users. Built using modern technologies like React.js, Express.js, Node.js, and PostgreSQL, it provides a seamless experience for both users and administrators.
