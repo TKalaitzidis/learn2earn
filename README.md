@@ -2,6 +2,7 @@
 
 Learn2Earn is a full-stack web application designed to facilitate book trading between users. Built using modern technologies like React.js, Express.js, Node.js, and PostgreSQL, it provides a seamless experience for both users and administrators.
 
+
 ## Table of Contents
 - [Features](#features)
 - [Tech Stack](#tech-stack)
